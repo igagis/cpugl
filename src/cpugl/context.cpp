@@ -1,4 +1,4 @@
-#include "renderer.hpp"
+#include "context.hpp"
 
 using namespace cpugl;
 

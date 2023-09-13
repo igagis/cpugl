@@ -24,10 +24,10 @@ SOFTWARE.
 
 /* ================ LICENSE END ================ */
 
-#include "context.hpp"
+#pragma once
 
-using namespace cpugl;
+namespace cpugl {
 
-void context::render(utki::span<const r4::vector4<real>> p){
+using real = float;
 
-}
+} // namespace cpugl

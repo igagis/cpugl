@@ -7,9 +7,10 @@ $(eval $(call prorab-config, ../../config))
 
 this_srcs += $(call prorab-src-dir, src)
 
-# this_ldlibs += ../../src/out/$(c)/libsvgren$(dot_so)
-this_ldlibs += -lutki
-this_ldflags += -L../../src
+this_cxxflags += -I ../../src
+
+this_ldlibs += -lutki -lcpugl
+this_ldflags += -L ../../src/out/$(c)
 
 ifeq ($(os), macosx)
 else ifeq ($(os),windows)

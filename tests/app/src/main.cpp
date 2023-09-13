@@ -6,7 +6,7 @@
 
 #include <papki/fs_file.hpp>
 
-#include <rasterimage/image_variant.hpp>
+#include <cpugl/context.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -46,10 +46,8 @@ int main(int argc, char **argv){
 	// image.write_png(papki::fs_file(out_filename));
 	
 #if M_OS == M_OS_LINUX
-	// auto width = int(img.dims().x() + 2);
-	// auto height = int(img.dims().y() + 2);
-	auto width = 800;
-	auto height = 600;
+	constexpr auto width = 800;
+	constexpr auto height = 600;
 
 	Display *display = XOpenDisplay(nullptr);
 	
@@ -79,30 +77,48 @@ int main(int argc, char **argv){
 					int dummy_int = 0;
 					unsigned dummy_unsigned = 0;
 					Window dummy_window = 0;
-					unsigned win_width = 0;
-					unsigned win_height = 0;
+					r4::vector2<unsigned> win_dims;
 					
-					XGetGeometry(display, window, &dummy_window, &dummy_int, &dummy_int, &win_width, &win_height, &dummy_unsigned, &dummy_unsigned);
-										
-					// using std::max;
+					XGetGeometry(
+						display,
+						window,
+						&dummy_window,
+						&dummy_int,
+						&dummy_int,
+						&win_dims.x(),
+						&win_dims.y(),
+						&dummy_unsigned,
+						&dummy_unsigned
+					);
 					
-					// svgren::parameters p;
-					// p.dpi = svgren::parameters::default_dpi;
-					// p.dims_request.x() = max(int(win_width) - 2, 0);
-					// p.dims_request.y() = max(int(win_height) - 2, 0);
-					// auto img = svgren::rasterize(*dom, p);
+					cpugl::context glc;
 
-					// img.swap_red_blue();
+					cpugl::context::fb_image_type fb(win_dims);
+
+					glc.set_framebuffer(fb);
+
+					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0xff, 0xff, 0xff};
+					glc.clear(bg_color);
+
+					std::vector<r4::vector4<cpugl::real>> vertices = {
+						{10, 10, 0, 0}, // NOLINT
+						{10, 50, 0, 0}, // NOLINT
+						{50, 10, 0, 0} // NOLINT
+					};
+
+					glc.render(vertices);
+
+					fb.swap_red_blue();
 
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-					// auto ximage = XCreateImage(display, visual, utki::byte_bits * 3, ZPixmap, 0, reinterpret_cast<char*>(img.pixels().data()), img.dims().x(), img.dims().y(), utki::byte_bits, 0);
-					// utki::scope_exit scope_exit([ximage](){
-					// 	ximage->data = nullptr; // Xlib will try to deallocate data which is owned by 'img' variable.
-					// 	XDestroyImage(ximage);
-					// });
+					auto ximage = XCreateImage(display, visual, utki::byte_bits * 3, ZPixmap, 0, reinterpret_cast<char*>(fb.pixels().data()), fb.dims().x(), fb.dims().y(), utki::byte_bits, 0);
+					utki::scope_exit scope_exit([ximage](){
+						ximage->data = nullptr; // Xlib will try to deallocate data which is owned by 'img' variable.
+						XDestroyImage(ximage);
+					});
 					
-					// // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast, cppcoreguidelines-pro-bounds-pointer-arithmetic)
-					// XPutImage(display, window, DefaultGC(display, 0), ximage, 0, 0, 1, 1, img.dims().x(), img.dims().y());
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+					XPutImage(display, window, DefaultGC(display, 0), ximage, 0, 0, 1, 1, fb.dims().x(), fb.dims().y());
 				}
 				break;
 			case KeyPress:

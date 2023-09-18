@@ -54,7 +54,7 @@ public:
 		this->framebuffer->clear(color);
 	}
 
-	void render(utki::span<const r4::vector4<real>> p);
+	void render(utki::span<const r4::vector4<real>> pos);
 };
 
 } // namespace cpugl

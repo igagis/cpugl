@@ -101,9 +101,9 @@ int main(int argc, char **argv){
 					glc.clear(bg_color);
 
 					std::vector<r4::vector4<cpugl::real>> vertices = {
-						{10, 10, 0, 0}, // NOLINT
-						{10, 50, 0, 0}, // NOLINT
-						{50, 10, 0, 0} // NOLINT
+						{10, 10, 0, 1}, // NOLINT
+						{10, 50, 0, 1}, // NOLINT
+						{50, 10, 0, 1} // NOLINT
 					};
 
 					glc.render(vertices);

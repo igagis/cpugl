@@ -26,8 +26,30 @@ SOFTWARE.
 
 #include "context.hpp"
 
+#include <r4/segment2.hpp>
+
 using namespace cpugl;
 
-void context::render(utki::span<const r4::vector4<real>> p){
+void context::render(utki::span<const r4::vector4<real>> pos)
+{
+	std::array<r4::vector4<real>, 3> face{};
+	auto face_i = face.begin();
+	for (const auto& p : pos) {
+		*face_i = p;
+		++face_i;
+		if (face_i != face.end()) {
+			continue;
+		}
+		face_i = face.begin();
 
+		using std::min;
+		using std::max;
+
+		// r4::segment2<real> bb{
+		// 	{min(face[0].x(), min(face[1].x(), face[2].x())), min(face[0].y(), min(face[1].y(), face[2].y()))},
+		// 	{max(face[0].x(), max(face[1].x(), face[2].x())), max(face[0].y(), max(face[1].y(), face[2].y()))},
+		// };
+
+		(*this->framebuffer)[p.y()][p.x()] = {0xff, 0, 0, 0xff};
+	}
 }

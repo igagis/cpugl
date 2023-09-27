@@ -51,7 +51,7 @@ public:
 		if (!this->framebuffer) {
 			return;
 		}
-		this->framebuffer->clear(color);
+		this->framebuffer->span().clear(color);
 	}
 
 	void render(utki::span<const r4::vector4<real>> pos);

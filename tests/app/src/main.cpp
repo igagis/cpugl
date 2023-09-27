@@ -97,7 +97,7 @@ int main(int argc, char **argv){
 
 					glc.set_framebuffer(fb);
 
-					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0xff, 0xff, 0xff};
+					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
 					glc.clear(bg_color);
 
 					std::vector<r4::vector4<cpugl::real>> vertices = {
@@ -108,7 +108,7 @@ int main(int argc, char **argv){
 
 					glc.render(vertices);
 
-					fb.swap_red_blue();
+					fb.span().swap_red_blue();
 
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 					auto ximage = XCreateImage(display, visual, utki::byte_bits * 3, ZPixmap, 0, reinterpret_cast<char*>(fb.pixels().data()), fb.dims().x(), fb.dims().y(), utki::byte_bits, 0);

@@ -75,7 +75,7 @@ void context::render(utki::span<const r4::vector4<real>> pos)
 				auto w2 = edge_function(face[0], face[1], p);
 
 				if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-					px = {0, 0xff, 0, 0xff};
+					px = {0, 0xff, 0, 0xff}; // NOLINT
 				}
 
 				++p.x();

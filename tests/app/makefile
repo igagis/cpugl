@@ -9,8 +9,9 @@ this_srcs += $(call prorab-src-dir, src)
 
 this_cxxflags += -I ../../src
 
-this_ldlibs += -lutki -lcpugl
-this_ldflags += -L ../../src/out/$(c)
+this_cpugl_lib := ../../src/out/$(c)/libcpugl$(dot_so)
+
+this_ldlibs += -lutki $(this_cpugl_lib)
 
 ifeq ($(os), macosx)
 else ifeq ($(os),windows)
@@ -22,27 +23,12 @@ this_no_install := true
 
 $(eval $(prorab-build-app))
 
-# ifeq ($(os),windows)
-#     this_run_cmd := $(a)cp $(d)../../src/out/$(c)/libsvgren$(dot_so) $(d) && $$^)
-# else
-    # this_run_cmd := $(a)(cd $(d); LD_LIBRARY_PATH=../../src/out/$(c) $$^)
-# endif
-
 this_run_name := $(this_name)
 this_test_cmd := $(prorab_this_name)
-this_test_deps := $(prorab_this_name)
+this_test_deps := $(prorab_this_name) $(this_cpugl_lib)
 this_test_ld_path := ../../src/out/$(c)
 $(eval $(prorab-run))
 
-# define this_rules
-#     run:: $(prorab_this_name)
-# $(.RECIPEPREFIX)@echo running $$^...
-# $(.RECIPEPREFIX)$(a)cp $(d)../../src/out/$(c)/libsvgren$(dot_so) . || true
-# $(.RECIPEPREFIX)$(a)LD_LIBRARY_PATH=$(d)../../src/out/$(c) $(d)out/$(c)/tests $(d)../samples/testdata/tiger.svg $(d)out.png
-# endef
-# $(eval $(this_rules))
-
-# add dependency on libcpugl
-# $(prorab_this_name): $(abspath $(d)../../src/out/$(c)/libsvgren$(dot_so))
+$(eval $(call prorab-depend, $(prorab_this_name), $(this_cpugl_lib)))
 
 $(eval $(call prorab-include, ../../src/makefile))

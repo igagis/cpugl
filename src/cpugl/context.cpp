@@ -30,14 +30,14 @@ SOFTWARE.
 
 using namespace cpugl;
 
-r4::segment2<real> calc_bounding_box_segment(const std::array<r4::vector4<real>, 3>& face)
+r4::segment2<real> calc_bounding_box_segment(const r4::vector2<real>& v0, const r4::vector2<real>& v1, const r4::vector2<real>& v2)
 {
 	using std::min;
 	using std::max;
-
+	
 	return {
-		{min(face[0].x(), min(face[1].x(), face[2].x())), min(face[0].y(), min(face[1].y(), face[2].y()))},
-		{max(face[0].x(), max(face[1].x(), face[2].x())), max(face[0].y(), max(face[1].y(), face[2].y()))},
+		min(v0, min(v1, v2)),
+		max(v0, max(v1, v2))
 	};
 }
 
@@ -58,7 +58,7 @@ void context::render(utki::span<const r4::vector4<real>> pos)
 		}
 		face_i = face.begin();
 
-		auto bb_segment = calc_bounding_box_segment(face);
+		auto bb_segment = calc_bounding_box_segment(face[0], face[1], face[2]);
 
 		r4::rectangle<real> bb = {
 			bb_segment.p1,

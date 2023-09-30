@@ -26,14 +26,26 @@ SOFTWARE.
 
 #pragma once
 
+#include <tuple>
+
+#include <utki/span.hpp>
+
+#include "context.hpp"
+
 namespace cpugl {
 
 class shader
 {
 protected:
-	template <typename vertex_program_type, typename fragment_program_type>
-	void rasterize(vertex_program_type vertex_program, fragment_program_type fragment_program)
+	template <typename vertex_program_type, typename fragment_program_type, bool depth_test = false>
+	void rasterize(
+		context& ctx,
+		const vertex_program_type&,
+		const fragment_program_type&,
+		const std::tuple<utki::span<const attribute_type>...>& attributes
+	)
 	{
+
 		// TODO:
 	}
 

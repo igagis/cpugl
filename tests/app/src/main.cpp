@@ -6,7 +6,7 @@
 
 #include <papki/fs_file.hpp>
 
-#include <cpugl/context.hpp>
+#include <cpugl/shaders/color_pos_shader.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -106,7 +106,13 @@ int main(int argc, char **argv){
 						{50, 10, 0, 1} // NOLINT
 					};
 
-					glc.render(vertices);
+					cpugl::color_pos_shader shader;
+
+					shader.render(
+						glc,
+						decltype(fb)::pixel_type{0xff, 0, 0, 0xff}, // NOLINT
+						vertices
+					);
 
 					fb.span().swap_red_blue();
 

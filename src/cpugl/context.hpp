@@ -26,9 +26,8 @@ SOFTWARE.
 
 #pragma once
 
-#include <rasterimage/image.hpp>
-
 #include <r4/segment2.hpp>
+#include <rasterimage/image.hpp>
 
 #include "config.hpp"
 

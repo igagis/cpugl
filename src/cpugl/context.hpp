@@ -76,9 +76,11 @@ public:
 	void render(
 		const vertex_program_type& vertex_program,
 		const fragment_program_type& fragment_program,
-		utki::span<const r4::vector4<real>> pos
+		std::tuple<utki::span<const r4::vector4<real>>> attribute
 	)
 	{
+		const auto& pos = std::get<0>(attribute);
+
 		std::array<r4::vector4<real>, 3> face{};
 		auto face_i = face.begin();
 		for (const auto& vertex : pos) {

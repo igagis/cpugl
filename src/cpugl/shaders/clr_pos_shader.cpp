@@ -24,24 +24,26 @@ SOFTWARE.
 
 /* ================ LICENSE END ================ */
 
-#include "color_pos_shader.hpp"
+#include "clr_pos_shader.hpp"
 
 using namespace cpugl;
 
-void color_pos_shader::render(
+void clr_pos_shader::render(
 	context& ctx,
 	const r4::matrix4<real>& matrix,
-	cpugl::context::fb_image_type::pixel_type color,
-	utki::span<const r4::vector4<real>> pos
+	utki::span<const r4::vector4<real>> pos,
+    utki::span<const r4::vector4<float>> clr
 )
 {
 	ctx.render<false>( // false = no depth test
-		[&matrix](const std::tuple<const r4::vector4<real>&>& attribute) {
+		[&matrix](const std::tuple<const r4::vector4<real>&, const r4::vector4<float>&>& attribute) {
 			const auto& pos = std::get<0>(attribute);
-			return std::make_tuple(matrix * pos);
+            const auto& clr = std::get<1>(attribute);
+			return std::make_tuple(matrix * pos, clr);
 		},
 		[](const auto& attribute) {
-			return r4::vector4<uint8_t>{0xff, 0, 0, 0xff};
+            const auto& clr = std::get<0>(attribute);
+			return clr;
 		},
 		{pos}
 	);

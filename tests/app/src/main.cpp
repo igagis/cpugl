@@ -6,7 +6,7 @@
 
 #include <papki/fs_file.hpp>
 
-#include <cpugl/shaders/color_pos_shader.hpp>
+#include <cpugl/shaders/clr_pos_shader.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -106,12 +106,19 @@ int main(int argc, char **argv){
 						{50, 10, 0, 1} // NOLINT
 					};
 
-					cpugl::color_pos_shader shader;
+					std::vector<r4::vector4<float>> colors = {
+						{1, 0, 0, 1},
+						{0, 1, 0, 1},
+						{0, 0, 1, 1}
+					};
+
+					cpugl::clr_pos_shader shader;
 
 					shader.render(
 						glc,
-						decltype(fb)::pixel_type{0xff, 0, 0, 0xff}, // NOLINT
-						vertices
+						r4::matrix4<cpugl::real>().set_identity(),
+						vertices,
+						colors
 					);
 
 					fb.span().swap_red_blue();

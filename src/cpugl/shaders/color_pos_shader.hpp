@@ -35,6 +35,7 @@ class color_pos_shader
 public:
 	void render( //
 		context& ctx,
+		const r4::matrix4<real>& matrix,
 		cpugl::context::fb_image_type::pixel_type color,
 		utki::span<const r4::vector4<real>> pos
 	);

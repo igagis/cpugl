@@ -34,5 +34,5 @@ void color_pos_shader::render(
 	utki::span<const r4::vector4<real>> pos
 )
 {
-	ctx.render(pos);
+	ctx.render<false>([]() {}, []() {}, pos);
 }

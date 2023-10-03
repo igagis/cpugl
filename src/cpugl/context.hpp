@@ -72,8 +72,12 @@ public:
 		this->framebuffer->span().clear(color);
 	}
 
-	// template <typename vertex_program_type, typename fragment_program_type, bool depth_test = false>
-	void render(utki::span<const r4::vector4<real>> pos)
+	template <bool depth_test, typename vertex_program_type, typename fragment_program_type>
+	void render(
+		const vertex_program_type& vertex_program,
+		const fragment_program_type& fragment_program,
+		utki::span<const r4::vector4<real>> pos
+	)
 	{
 		std::array<r4::vector4<real>, 3> face{};
 		auto face_i = face.begin();

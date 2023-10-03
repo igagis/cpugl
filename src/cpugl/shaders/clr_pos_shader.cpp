@@ -36,15 +36,13 @@ void clr_pos_shader::render(
 )
 {
 	ctx.render<false>( // false = no depth test
-		[&matrix](const std::tuple<const r4::vector4<real>&, const r4::vector4<float>&>& attribute) {
-			const auto& pos = std::get<0>(attribute);
-            const auto& clr = std::get<1>(attribute);
+		[&matrix](const r4::vector4<real>& pos, const r4::vector4<float>& clr) {
 			return std::make_tuple(matrix * pos, clr);
 		},
-		[](const auto& attribute) {
-            const auto& clr = std::get<0>(attribute);
+		[](const auto& clr) {
 			return clr;
 		},
-		{pos}
+		pos,
+        clr
 	);
 }

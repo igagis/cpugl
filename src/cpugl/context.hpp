@@ -72,14 +72,20 @@ public:
 		this->framebuffer->span().clear(color);
 	}
 
-	template <bool depth_test, typename vertex_program_type, typename fragment_program_type>
+	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename ... attribute_type>
 	void render(
 		const vertex_program_type& vertex_program,
 		const fragment_program_type& fragment_program,
-		std::tuple<utki::span<const r4::vector4<real>>> attribute
+		utki::span<const attribute_type>... attribute
 	)
 	{
-		const auto& pos = std::get<0>(attribute);
+		auto attrs_tuple = std::make_tuple(attribute...);
+		static_assert(std::is_invocable_v<decltype(vertex_program), const attribute_type&...>, "vertex_program must be invocable");
+
+		// TODO:
+		// static_assert(std::is_invocable_v<decltype(fragment_program)>, "fragment_program must be invocable");
+
+		const auto& pos = std::get<0>(attrs_tuple);
 
 		std::array<r4::vector4<real>, 3> face{};
 		auto face_i = face.begin();

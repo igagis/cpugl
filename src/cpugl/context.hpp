@@ -72,6 +72,11 @@ public:
 		this->framebuffer->span().clear(color);
 	}
 
+	// template <typename first_arg_type, typename ... rest_args_type>
+	// std::tuple<rest_args_type...> subtuple(first_arg_type, rest_args_type... args){
+	// 	return std::make_tuple(args...);
+	// }
+
 	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename ... attribute_type>
 	void render(
 		const vertex_program_type& vertex_program,

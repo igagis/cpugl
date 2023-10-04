@@ -93,9 +93,15 @@ public:
 		// TODO:
 		// static_assert(std::is_invocable_v<decltype(fragment_program)>, "fragment_program must be invocable");
 
-		using attrs_tuple_type = std::tuple<std::remove_const_t<typename decltype(attribute)::value_type>...>;
+		using vertex_program_res_type = decltype( //
+			vertex_program( //
+				std::declval<typename decltype(attribute)::value_type>()...
+			)
+		);
 
-		std::array<attrs_tuple_type, 3> face{};
+		// std::tuple<std::remove_const_t<typename decltype(attribute)::value_type>...>;
+
+		std::array<vertex_program_res_type, 3> face{};
 
 		auto face_i = face.begin();
 		for (auto attr_iters = std::make_tuple(attribute.begin()...);
@@ -107,12 +113,14 @@ public:
 				 attr_iters
 			 ))
 		{
-			*face_i = std::apply(
+			auto vertex_program_args_tuple = std::apply(
 				[](const auto&... i) {
 					return std::make_tuple((*i)...);
 				},
 				attr_iters
 			);
+
+			*face_i = std::apply(vertex_program, vertex_program_args_tuple);
 			++face_i;
 			if (face_i != face.end()) {
 				continue;
@@ -137,6 +145,9 @@ public:
 					auto w2 = edge_function(std::get<0>(face[0]), std::get<0>(face[1]), p);
 
 					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+						// interpolate attributes
+						// TODO: call fragment_prorgam
+
 						px = {0, 0xff, 0, 0xff}; // NOLINT
 					}
 

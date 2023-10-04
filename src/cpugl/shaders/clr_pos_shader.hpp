@@ -37,7 +37,7 @@ public:
 		context& ctx,
 		const r4::matrix4<real>& matrix,
 		utki::span<const r4::vector4<real>> pos,
-        utki::span<const r4::vector4<float>> clr
+		utki::span<const r4::vector4<float>> clr
 	);
 };
 

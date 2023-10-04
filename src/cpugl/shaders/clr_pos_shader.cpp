@@ -32,7 +32,7 @@ void clr_pos_shader::render(
 	context& ctx,
 	const r4::matrix4<real>& matrix,
 	utki::span<const r4::vector4<real>> pos,
-    utki::span<const r4::vector4<float>> clr
+	utki::span<const r4::vector4<float>> clr
 )
 {
 	ctx.render<false>( // false = no depth test
@@ -43,6 +43,6 @@ void clr_pos_shader::render(
 			return clr;
 		},
 		pos,
-        clr
+		clr
 	);
 }

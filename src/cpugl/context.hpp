@@ -77,7 +77,7 @@ public:
 	// 	return std::make_tuple(args...);
 	// }
 
-	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename ... attribute_type>
+	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename... attribute_type>
 	void render(
 		const vertex_program_type& vertex_program,
 		const fragment_program_type& fragment_program,
@@ -85,24 +85,42 @@ public:
 	)
 	{
 		auto attrs_tuple = std::make_tuple(attribute...);
-		static_assert(std::is_invocable_v<decltype(vertex_program), const attribute_type&...>, "vertex_program must be invocable");
+		static_assert(
+			std::is_invocable_v<decltype(vertex_program), const attribute_type&...>,
+			"vertex_program must be invocable"
+		);
 
 		// TODO:
 		// static_assert(std::is_invocable_v<decltype(fragment_program)>, "fragment_program must be invocable");
 
-		const auto& pos = std::get<0>(attrs_tuple);
+		using attrs_tuple_type = std::tuple<std::remove_const_t<typename decltype(attribute)::value_type>...>;
 
-		std::array<r4::vector4<real>, 3> face{};
+		std::array<attrs_tuple_type, 3> face{};
+
 		auto face_i = face.begin();
-		for (const auto& vertex : pos) {
-			*face_i = vertex;
+		for (auto attr_iters = std::make_tuple(attribute.begin()...);
+			 std::get<0>(attr_iters) != std::get<0>(attrs_tuple).end();
+			 std::apply(
+				 [](auto&... i) {
+					 (..., ++i);
+				 },
+				 attr_iters
+			 ))
+		{
+			*face_i = std::apply(
+				[](const auto&... i) {
+					return std::make_tuple((*i)...);
+				},
+				attr_iters
+			);
 			++face_i;
 			if (face_i != face.end()) {
 				continue;
 			}
 			face_i = face.begin();
 
-			auto bb_segment = calc_bounding_box_segment(face[0], face[1], face[2]);
+			auto bb_segment =
+				calc_bounding_box_segment(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
 
 			r4::rectangle<real> bb = {
 				bb_segment.p1,
@@ -114,9 +132,9 @@ public:
 			auto p = bb.p;
 			for (auto line : framebuffer_span) {
 				for (auto& px : line) {
-					auto w0 = edge_function(face[1], face[2], p);
-					auto w1 = edge_function(face[2], face[0], p);
-					auto w2 = edge_function(face[0], face[1], p);
+					auto w0 = edge_function(std::get<0>(face[1]), std::get<0>(face[2]), p);
+					auto w1 = edge_function(std::get<0>(face[2]), std::get<0>(face[0]), p);
+					auto w2 = edge_function(std::get<0>(face[0]), std::get<0>(face[1]), p);
 
 					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
 						px = {0, 0xff, 0, 0xff}; // NOLINT

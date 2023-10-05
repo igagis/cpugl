@@ -72,10 +72,15 @@ public:
 		this->framebuffer->span().clear(color);
 	}
 
-	// template <typename first_arg_type, typename ... rest_args_type>
-	// std::tuple<rest_args_type...> subtuple(first_arg_type, rest_args_type... args){
-	// 	return std::make_tuple(args...);
-	// }
+	// TODO: move it to utki
+	template < template <typename...> class template_ttype, typename checked_type >
+	struct is_specialization_of : std::false_type {};
+
+	template < template <typename...> class template_ttype, typename... args_type >
+	struct is_specialization_of< template_ttype, template_ttype<args_type...> > : std::true_type {};
+
+	template < template <typename...> class template_ttype, typename checked_type >
+	constexpr static bool is_specialization_of_v = is_specialization_of<template_ttype, checked_type>::value;
 
 	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename... attribute_type>
 	void render(
@@ -98,6 +103,10 @@ public:
 				std::declval<typename decltype(attribute)::value_type>()...
 			)
 		);
+
+		static_assert(is_specialization_of_v<std::tuple, vertex_program_res_type>, "vertex program return type must be std::tuple");
+
+		// using fragment_program_args_tuple_type = 
 
 		// std::tuple<std::remove_const_t<typename decltype(attribute)::value_type>...>;
 

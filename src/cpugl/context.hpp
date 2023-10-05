@@ -73,14 +73,43 @@ public:
 	}
 
 	// TODO: move it to utki
-	template < template <typename...> class template_ttype, typename checked_type >
+	template <template <typename...> class template_ttype, typename checked_type>
 	struct is_specialization_of : std::false_type {};
 
-	template < template <typename...> class template_ttype, typename... args_type >
-	struct is_specialization_of< template_ttype, template_ttype<args_type...> > : std::true_type {};
+	template <template <typename...> class template_ttype, typename... args_type>
+	struct is_specialization_of<template_ttype, template_ttype<args_type...>> : std::true_type {};
 
-	template < template <typename...> class template_ttype, typename checked_type >
+	template <template <typename...> class template_ttype, typename checked_type>
 	constexpr static bool is_specialization_of_v = is_specialization_of<template_ttype, checked_type>::value;
+
+	// TODO: move to utki
+	template <std::size_t offset, typename sequence_type>
+	struct offset_sequence;
+
+	template <std::size_t offset, std::size_t... indices>
+	struct offset_sequence<offset, std::index_sequence<indices...>> {
+		using type = std::index_sequence<indices + offset...>;
+	};
+
+	template <std::size_t offset, typename sequence_type>
+	using offset_sequence_t = typename offset_sequence<offset, sequence_type>::type;
+
+	// template <typename tuple_type, typename index_subsequence_type>
+	// struct subtuple;
+
+	// template <typename tuple_type, size_t... indices>
+	// struct subtuple<tuple_type, std::index_sequence<indices...>> {
+	// 	using type = std::tuple<std::tuple_element_t<indices, tuple_type>...>;
+	// };
+
+	template <typename tuple_type, size_t... indices>
+	auto subtuple(const tuple_type& t, std::index_sequence<indices...>)
+	{
+		return std::make_tuple(std::get<indices>(t)...);
+	}
+
+	// Rasterization tutorial:
+	// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
 
 	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename... attribute_type>
 	void render(
@@ -104,11 +133,10 @@ public:
 			)
 		);
 
-		static_assert(is_specialization_of_v<std::tuple, vertex_program_res_type>, "vertex program return type must be std::tuple");
-
-		// using fragment_program_args_tuple_type = 
-
-		// std::tuple<std::remove_const_t<typename decltype(attribute)::value_type>...>;
+		static_assert(
+			is_specialization_of_v<std::tuple, vertex_program_res_type>,
+			"vertex program return type must be std::tuple"
+		);
 
 		std::array<vertex_program_res_type, 3> face{};
 
@@ -149,12 +177,25 @@ public:
 			auto p = bb.p;
 			for (auto line : framebuffer_span) {
 				for (auto& px : line) {
-					auto w0 = edge_function(std::get<0>(face[1]), std::get<0>(face[2]), p);
-					auto w1 = edge_function(std::get<0>(face[2]), std::get<0>(face[0]), p);
-					auto w2 = edge_function(std::get<0>(face[0]), std::get<0>(face[1]), p);
+					auto barycentric = r4::vector3<real>{
+						edge_function(std::get<0>(face[1]), std::get<0>(face[2]), p),
+						edge_function(std::get<0>(face[2]), std::get<0>(face[0]), p),
+						edge_function(std::get<0>(face[0]), std::get<0>(face[1]), p)
+					};
 
-					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+					if (barycentric.is_positive_or_zero()) {
+						// normalize barycentric coordinates
+						auto area = edge_function(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
+						barycentric /= area;
+
 						// interpolate attributes
+
+						// auto interpolated_attributes = [&b = barycentric](std::index_sequence<auto>) {
+						// 	return std::make_tuple();
+						// }(offset_sequence_t<1, std::make_index_sequence<std::tuple_size_v<vertex_program_res_type>>>{});
+
+						// TODO:
+
 						// TODO: call fragment_prorgam
 
 						px = {0, 0xff, 0, 0xff}; // NOLINT

@@ -167,14 +167,14 @@ public:
 			auto bb_segment =
 				calc_bounding_box_segment(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
 
-			r4::rectangle<real> bb = {
+			r4::rectangle<real> bounding_box = {
 				bb_segment.p1,
 				bb_segment.p2 - bb_segment.p1 + decltype(bb_segment.p1)(1) // +1 because segment is [p1, p2]
 			};
 
-			auto framebuffer_span = this->framebuffer->span().subspan(bb.to<unsigned>());
+			auto framebuffer_span = this->framebuffer->span().subspan(bounding_box.to<unsigned>());
 
-			auto p = bb.p;
+			auto p = bounding_box.p;
 			for (auto line : framebuffer_span) {
 				for (auto& px : line) {
 					auto barycentric = r4::vector3<real>{
@@ -203,7 +203,7 @@ public:
 
 					++p.x();
 				}
-				p.x() = bb.p.x();
+				p.x() = bounding_box.p.x();
 				++p.y();
 			}
 		}

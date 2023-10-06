@@ -40,7 +40,7 @@ void color_pos_shader::render(
 			const auto& pos = std::get<0>(attribute);
 			return std::make_tuple(matrix * pos);
 		},
-		[](const auto& attribute) {
+		[]() {
 			return r4::vector4<uint8_t>{0xff, 0, 0, 0xff};
 		},
 		pos

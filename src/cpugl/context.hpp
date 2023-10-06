@@ -124,9 +124,6 @@ public:
 			"vertex_program must be invocable"
 		);
 
-		// TODO:
-		// static_assert(std::is_invocable_v<decltype(fragment_program)>, "fragment_program must be invocable");
-
 		using vertex_program_res_type = decltype( //
 			vertex_program( //
 				std::declval<typename decltype(attribute)::value_type>()...
@@ -190,15 +187,33 @@ public:
 
 						// interpolate attributes
 
-						// auto interpolated_attributes = [&b = barycentric](std::index_sequence<auto>) {
-						// 	return std::make_tuple();
-						// }(offset_sequence_t<1, std::make_index_sequence<std::tuple_size_v<vertex_program_res_type>>>{});
+						auto interpolated_attributes = //
+							[&b = barycentric, &f = face]<size_t... i>(std::index_sequence<i...>) {
+								return std::make_tuple(
+									(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2])...
+								);
+							}(offset_sequence_t<
+								1,
+								std::make_index_sequence< //
+									std::tuple_size_v<vertex_program_res_type> - 1 //
+									> //
+								>{});
 
-						// TODO:
+						static_assert(
+							is_specialization_of_v<std::tuple, decltype(interpolated_attributes)>,
+							"interpolated_attributes type must be std::tuple"
+						);
 
-						// TODO: call fragment_prorgam
+						static_assert(
+							[]<typename... arg_type>(std::tuple<arg_type...>) constexpr {
+								return std::is_invocable_v<decltype(fragment_program), const arg_type&...>;
+							}(decltype(interpolated_attributes){}),
+							"vertex_program must be invocable"
+						);
 
-						px = {0, 0xff, 0, 0xff}; // NOLINT
+						auto pixel_color = std::apply(fragment_program, interpolated_attributes);
+
+						px = rasterimage::to<std::remove_reference_t<decltype(px)>::value_type>(pixel_color);
 					}
 
 					++p.x();

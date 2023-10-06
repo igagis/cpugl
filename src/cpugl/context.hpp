@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include <r4/segment2.hpp>
 #include <rasterimage/image.hpp>
+#include <utki/types.hpp>
 
 #include "config.hpp"
 
@@ -72,28 +73,6 @@ public:
 		this->framebuffer->span().clear(color);
 	}
 
-	// TODO: move it to utki
-	template <template <typename...> class template_ttype, typename checked_type>
-	struct is_specialization_of : std::false_type {};
-
-	template <template <typename...> class template_ttype, typename... args_type>
-	struct is_specialization_of<template_ttype, template_ttype<args_type...>> : std::true_type {};
-
-	template <template <typename...> class template_ttype, typename checked_type>
-	constexpr static bool is_specialization_of_v = is_specialization_of<template_ttype, checked_type>::value;
-
-	// TODO: move to utki
-	template <std::size_t offset, typename sequence_type>
-	struct offset_sequence;
-
-	template <std::size_t offset, std::size_t... indices>
-	struct offset_sequence<offset, std::index_sequence<indices...>> {
-		using type = std::index_sequence<indices + offset...>;
-	};
-
-	template <std::size_t offset, typename sequence_type>
-	using offset_sequence_t = typename offset_sequence<offset, sequence_type>::type;
-
 	// Rasterization tutorial:
 	// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
 
@@ -117,7 +96,7 @@ public:
 		);
 
 		static_assert(
-			is_specialization_of_v<std::tuple, vertex_program_res_type>,
+			utki::is_specialization_of_v<std::tuple, vertex_program_res_type>,
 			"vertex program return type must be std::tuple"
 		);
 
@@ -178,7 +157,7 @@ public:
 								return std::make_tuple(
 									(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2])...
 								);
-							}(offset_sequence_t<
+							}(utki::offset_sequence_t<
 								1,
 								std::make_index_sequence< //
 									std::tuple_size_v<vertex_program_res_type> - 1 //
@@ -186,7 +165,7 @@ public:
 								>{});
 
 						static_assert(
-							is_specialization_of_v<std::tuple, decltype(interpolated_attributes)>,
+							utki::is_specialization_of_v<std::tuple, decltype(interpolated_attributes)>,
 							"interpolated_attributes type must be std::tuple"
 						);
 

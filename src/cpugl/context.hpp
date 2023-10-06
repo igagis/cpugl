@@ -94,20 +94,6 @@ public:
 	template <std::size_t offset, typename sequence_type>
 	using offset_sequence_t = typename offset_sequence<offset, sequence_type>::type;
 
-	// template <typename tuple_type, typename index_subsequence_type>
-	// struct subtuple;
-
-	// template <typename tuple_type, size_t... indices>
-	// struct subtuple<tuple_type, std::index_sequence<indices...>> {
-	// 	using type = std::tuple<std::tuple_element_t<indices, tuple_type>...>;
-	// };
-
-	template <typename tuple_type, size_t... indices>
-	auto subtuple(const tuple_type& t, std::index_sequence<indices...>)
-	{
-		return std::make_tuple(std::get<indices>(t)...);
-	}
-
 	// Rasterization tutorial:
 	// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
 

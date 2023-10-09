@@ -27,11 +27,24 @@ SOFTWARE.
 #pragma once
 
 #include <vector>
+#include <numeric>
 
 #include <utki/debug.hpp>
 #include <utki/span.hpp>
 
 namespace cpugl {
+
+/**
+ * @brief Vertex data rendering mode.
+ * Enumeration defining how to interpret vertex data when rendering.
+ */
+enum class rendering_mode {
+	triangles,
+	triangle_fan,
+	triangle_strip,
+
+	enum_size
+};
 
 template <typename... attribute_type>
 class vertex_array
@@ -41,23 +54,15 @@ public:
 
 	std::vector<unsigned> indices;
 
-	/**
-	 * @brief Vertex data rendering mode.
-	 * Enumeration defining how to interpret vertex data when rendering.
-	 */
-	enum class mode {
-		triangles,
-		triangle_fan,
-		triangle_strip,
-
-		enum_size
-	};
-
-	mode rendering_mode;
+	rendering_mode mode;
 };
 
 template <typename... attribute_type>
-vertex_array<attribute_type...> make_vertex_array(utki::span<const attribute_type>... attribute)
+vertex_array<attribute_type...> make_vertex_array(
+	utki::span<const attribute_type>... attribute,
+	std::vector<unsigned> indices,
+	rendering_mode mode
+)
 {
 	// all spans must be of the same size
 	ASSERT((... == attribute.size()))
@@ -65,6 +70,9 @@ vertex_array<attribute_type...> make_vertex_array(utki::span<const attribute_typ
 	auto attrs_tuple = std::make_tuple(attribute...);
 
 	vertex_array<attribute_type...> vao;
+
+	vao.indices = std::move(indices);
+	vao.mode = mode;
 
 	for (auto iters = std::make_tuple(attribute.begin()...); //
 		 std::get<0>(iters) != std::get<0>(attrs_tuple).end();
@@ -82,6 +90,16 @@ vertex_array<attribute_type...> make_vertex_array(utki::span<const attribute_typ
 			iters
 		));
 	}
+
+    // assert that all the indices are within vertices array
+	ASSERT(std::accumulate( //
+		vao.indices.begin(),
+		vao.indices.end(),
+		true,
+		[&vao](auto acc, auto val) {
+			return acc && (val < vao.vertices.size());
+		}
+	))
 
 	return vao;
 }

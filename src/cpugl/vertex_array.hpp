@@ -26,8 +26,8 @@ SOFTWARE.
 
 #pragma once
 
-#include <vector>
 #include <numeric>
+#include <vector>
 
 #include <utki/debug.hpp>
 #include <utki/span.hpp>
@@ -59,9 +59,9 @@ public:
 
 template <typename... attribute_type>
 vertex_array<attribute_type...> make_vertex_array(
-	utki::span<const attribute_type>... attribute,
-	std::vector<unsigned> indices,
-	rendering_mode mode
+    rendering_mode mode,
+    std::vector<unsigned> indices,
+	utki::span<const attribute_type>... attribute
 )
 {
 	// all spans must be of the same size
@@ -83,7 +83,7 @@ vertex_array<attribute_type...> make_vertex_array(
 			 iters
 		 ))
 	{
-		vao.push_back(std::apply(
+		vao.vertices.push_back(std::apply(
 			[](auto... i) {
 				return std::make_tuple(*i...);
 			},
@@ -91,7 +91,7 @@ vertex_array<attribute_type...> make_vertex_array(
 		));
 	}
 
-    // assert that all the indices are within vertices array
+	// assert that all the indices are within vertices array
 	ASSERT(std::accumulate( //
 		vao.indices.begin(),
 		vao.indices.end(),

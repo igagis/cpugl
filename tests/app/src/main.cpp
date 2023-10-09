@@ -100,17 +100,26 @@ int main(int argc, char **argv){
 					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
 					glc.clear(bg_color);
 
-					std::vector<r4::vector4<cpugl::real>> vertices = {
+					const std::vector<r4::vector4<cpugl::real>> vertices = {
 						{10, 10, 0, 1}, // NOLINT
 						{10, 500, 0, 1}, // NOLINT
 						{500, 10, 0, 1} // NOLINT
 					};
 
-					std::vector<r4::vector4<float>> colors = {
+					const std::vector<r4::vector4<float>> colors = {
 						{1, 0, 0, 1},
 						{0, 1, 0, 1},
 						{0, 0, 1, 1}
 					};
+
+					std::vector<unsigned> indices = {0, 1, 2};
+
+					auto vao = cpugl::make_vertex_array(
+						cpugl::rendering_mode::triangles,
+						std::move(indices),
+						utki::make_span(vertices),
+						utki::make_span(colors)
+					);
 
 					cpugl::clr_pos_shader shader;
 

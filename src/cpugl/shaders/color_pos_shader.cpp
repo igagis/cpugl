@@ -41,7 +41,7 @@ void color_pos_shader::render(
 			return std::make_tuple(matrix * pos);
 		},
 		[]() {
-			return r4::vector4<uint8_t>{0xff, 0, 0, 0xff};
+			return r4::vector4<uint8_t>{0xff, 0, 0, 0xff}; // NOLINT
 		},
 		pos
 	);

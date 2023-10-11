@@ -26,6 +26,8 @@ SOFTWARE.
 
 #include "clr_pos_shader.hpp"
 
+#include "../pipeline.hpp"
+
 using namespace cpugl;
 
 void clr_pos_shader::render(
@@ -35,7 +37,8 @@ void clr_pos_shader::render(
 	utki::span<const r4::vector4<float>> clr
 )
 {
-	ctx.render<false>( // false = no depth test
+	pipeline::render<false>( // false = no depth test
+		ctx,
 		[&matrix](const r4::vector4<real>& pos, const r4::vector4<float>& clr) {
 			return std::make_tuple(matrix * pos, clr);
 		},

@@ -59,8 +59,8 @@ public:
 
 template <typename... attribute_type>
 vertex_array<attribute_type...> make_vertex_array(
-    rendering_mode mode,
-    std::vector<unsigned> indices,
+	rendering_mode mode,
+	std::vector<unsigned> indices,
 	utki::span<const attribute_type>... attribute
 )
 {
@@ -68,6 +68,12 @@ vertex_array<attribute_type...> make_vertex_array(
 	ASSERT((... == attribute.size()))
 
 	auto attrs_tuple = std::make_tuple(attribute...);
+
+	ASSERT(
+		(mode == rendering_mode::triangles && indices.size() % 3 == 0)
+		|| (mode == rendering_mode::triangle_fan && std::get<0>(attrs_tuple).size() >= 3)
+		|| (mode == rendering_mode::triangle_strip && std::get<0>(attrs_tuple).size() >= 3)
+	)
 
 	vertex_array<attribute_type...> vao;
 

@@ -26,6 +26,8 @@ SOFTWARE.
 
 #include "color_pos_shader.hpp"
 
+#include "../pipeline.hpp"
+
 using namespace cpugl;
 
 void color_pos_shader::render(
@@ -35,7 +37,9 @@ void color_pos_shader::render(
 	utki::span<const r4::vector4<real>> pos
 )
 {
-	ctx.render<false>( // false = no depth test
+
+	pipeline::render<false>( // false = no depth test
+		ctx,
 		[&matrix](const std::tuple<const r4::vector4<real>&>& attribute) {
 			const auto& pos = std::get<0>(attribute);
 			return std::make_tuple(matrix * pos);

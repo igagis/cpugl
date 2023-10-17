@@ -112,11 +112,10 @@ int main(int argc, char **argv){
 						{0, 0, 1, 1}
 					};
 
-					std::vector<unsigned> indices = {0, 1, 2};
+					std::vector<r4::vector3<unsigned>> faces = {{0, 1, 2}};
 
 					auto vao = cpugl::make_vertex_array(
-						cpugl::rendering_mode::triangles,
-						std::move(indices),
+						std::move(faces),
 						utki::make_span(vertices),
 						utki::make_span(colors)
 					);

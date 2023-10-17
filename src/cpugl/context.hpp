@@ -57,7 +57,8 @@ public:
 		this->framebuffer->span().clear(color);
 	}
 
-	fb_image_type& get_framebuffer(){
+	fb_image_type& get_framebuffer()
+	{
 		ASSERT(this->framebuffer)
 		return *this->framebuffer;
 	}

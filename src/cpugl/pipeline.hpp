@@ -31,10 +31,11 @@ SOFTWARE.
 #include "config.hpp"
 #include "context.hpp"
 
-namespace cpugl{
+namespace cpugl {
 
-class pipeline{
-    static r4::segment2<real> calc_bounding_box_segment(
+class pipeline
+{
+	static r4::segment2<real> calc_bounding_box_segment(
 		const r4::vector2<real>& v0,
 		const r4::vector2<real>& v1,
 		const r4::vector2<real>& v2
@@ -50,13 +51,14 @@ class pipeline{
 	{
 		return (c - a).cross(b - a);
 	}
+
 public:
-    // Rasterization tutorial:
+	// Rasterization tutorial:
 	// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
 
 	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename... attribute_type>
 	static void render(
-        context& ctx,
+		context& ctx,
 		const vertex_program_type& vertex_program,
 		const fragment_program_type& fragment_program,
 		utki::span<const attribute_type>... attribute
@@ -169,4 +171,4 @@ public:
 	}
 };
 
-}
+} // namespace cpugl

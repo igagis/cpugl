@@ -37,7 +37,6 @@ void color_pos_shader::render(
 	utki::span<const r4::vector4<real>> pos
 )
 {
-
 	pipeline::render<false>( // false = no depth test
 		ctx,
 		[&matrix](const std::tuple<const r4::vector4<real>&>& attribute) {

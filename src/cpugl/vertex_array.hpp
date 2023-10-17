@@ -34,33 +34,18 @@ SOFTWARE.
 
 namespace cpugl {
 
-/**
- * @brief Vertex data rendering mode.
- * Enumeration defining how to interpret vertex data when rendering.
- */
-enum class rendering_mode {
-	triangles,
-	triangle_fan,
-	triangle_strip,
-
-	enum_size
-};
-
 template <typename... attribute_type>
 class vertex_array
 {
 public:
 	std::vector<std::tuple<attribute_type...>> vertices;
 
-	std::vector<unsigned> indices;
-
-	rendering_mode mode;
+	std::vector<r4::vector3<unsigned>> faces;
 };
 
 template <typename... attribute_type>
 vertex_array<attribute_type...> make_vertex_array(
-	rendering_mode mode,
-	std::vector<unsigned> indices,
+	std::vector<r4::vector3<unsigned>> faces,
 	utki::span<const attribute_type>... attribute
 )
 {
@@ -69,16 +54,9 @@ vertex_array<attribute_type...> make_vertex_array(
 
 	auto attrs_tuple = std::make_tuple(attribute...);
 
-	ASSERT(
-		(mode == rendering_mode::triangles && indices.size() % 3 == 0)
-		|| (mode == rendering_mode::triangle_fan && std::get<0>(attrs_tuple).size() >= 3)
-		|| (mode == rendering_mode::triangle_strip && std::get<0>(attrs_tuple).size() >= 3)
-	)
-
 	vertex_array<attribute_type...> vao;
 
-	vao.indices = std::move(indices);
-	vao.mode = mode;
+	vao.faces = std::move(faces);
 
 	for (auto iters = std::make_tuple(attribute.begin()...); //
 		 std::get<0>(iters) != std::get<0>(attrs_tuple).end();
@@ -99,11 +77,19 @@ vertex_array<attribute_type...> make_vertex_array(
 
 	// assert that all the indices are within vertices array
 	ASSERT(std::accumulate( //
-		vao.indices.begin(),
-		vao.indices.end(),
+		vao.faces.begin(),
+		vao.faces.end(),
 		true,
-		[&vao](auto acc, auto val) {
-			return acc && (val < vao.vertices.size());
+		[&vao](auto acc, auto face) {
+			return acc
+				&& std::accumulate( //
+					   face.begin(),
+					   face.end(),
+					   true,
+					   [&vao](auto acc, auto val) {
+						   return acc && (val < vao.vertices.size());
+					   }
+				);
 		}
 	))
 

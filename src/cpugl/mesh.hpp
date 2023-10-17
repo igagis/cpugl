@@ -29,8 +29,11 @@ SOFTWARE.
 #include <numeric>
 #include <vector>
 
+#include <r4/vector.hpp>
 #include <utki/debug.hpp>
 #include <utki/span.hpp>
+
+#include "config.hpp"
 
 namespace cpugl {
 
@@ -38,7 +41,7 @@ template <typename... attribute_type>
 class mesh
 {
 public:
-	std::vector<std::tuple<attribute_type...>> vertices;
+	std::vector<std::tuple<r4::vector4<real>, attribute_type...>> vertices;
 
 	std::vector<r4::vector3<unsigned>> faces;
 };
@@ -46,20 +49,19 @@ public:
 template <typename... attribute_type>
 mesh<attribute_type...> make_mesh(
 	std::vector<r4::vector3<unsigned>> faces,
+	utki::span<const r4::vector4<real>> pos,
 	utki::span<const attribute_type>... attribute
 )
 {
 	// all spans must be of the same size
-	ASSERT((... == attribute.size()))
-
-	auto attrs_tuple = std::make_tuple(attribute...);
+	ASSERT(pos.size() == (... == attribute.size()))
 
 	mesh<attribute_type...> vao;
 
 	vao.faces = std::move(faces);
 
-	for (auto iters = std::make_tuple(attribute.begin()...); //
-		 std::get<0>(iters) != std::get<0>(attrs_tuple).end();
+	for (auto iters = std::make_tuple(pos.begin(), attribute.begin()...); //
+		 std::get<0>(iters) != pos.end();
 		 std::apply(
 			 [](auto&... i) {
 				 (..., ++i);

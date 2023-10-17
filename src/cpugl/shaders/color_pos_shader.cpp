@@ -34,7 +34,7 @@ void color_pos_shader::render(
 	context& ctx,
 	const r4::matrix4<real>& matrix,
 	cpugl::context::fb_image_type::pixel_type color,
-	utki::span<const r4::vector4<real>> pos
+	const mesh<>& mesh
 )
 {
 	pipeline::render<false>( // false = no depth test
@@ -46,6 +46,6 @@ void color_pos_shader::render(
 		[]() {
 			return r4::vector4<uint8_t>{0xff, 0, 0, 0xff}; // NOLINT
 		},
-		pos
+		mesh
 	);
 }

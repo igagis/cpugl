@@ -27,6 +27,7 @@ SOFTWARE.
 #pragma once
 
 #include "../context.hpp"
+#include "../mesh.hpp"
 
 namespace cpugl {
 
@@ -37,7 +38,7 @@ public:
 		context& ctx,
 		const r4::matrix4<real>& matrix,
 		cpugl::context::fb_image_type::pixel_type color,
-		utki::span<const r4::vector4<real>> pos
+		const mesh<>& mesh
 	);
 };
 

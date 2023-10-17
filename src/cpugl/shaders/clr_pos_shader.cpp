@@ -30,12 +30,7 @@ SOFTWARE.
 
 using namespace cpugl;
 
-void clr_pos_shader::render(
-	context& ctx,
-	const r4::matrix4<real>& matrix,
-	utki::span<const r4::vector4<real>> pos,
-	utki::span<const r4::vector4<float>> clr
-)
+void clr_pos_shader::render(context& ctx, const r4::matrix4<real>& matrix, const mesh<r4::vector4<float>>& mesh)
 {
 	pipeline::render<false>( // false = no depth test
 		ctx,
@@ -45,7 +40,6 @@ void clr_pos_shader::render(
 		[](const auto& clr) {
 			return clr;
 		},
-		pos,
-		clr
+		mesh
 	);
 }

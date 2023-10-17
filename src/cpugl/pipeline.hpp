@@ -62,18 +62,20 @@ public:
 		context& ctx,
 		const vertex_program_type& vertex_program,
 		const fragment_program_type& fragment_program,
-		utki::span<const attribute_type>... attribute
+		const mesh<attribute_type...>& mesh
 	)
 	{
-		auto attrs_tuple = std::make_tuple(attribute...);
 		static_assert(
-			std::is_invocable_v<decltype(vertex_program), const attribute_type&...>,
+			[]<typename... arg_type>(std::tuple<arg_type...>) constexpr {
+				return std::is_invocable_v<decltype(vertex_program), const r4::vector4<real>&, const arg_type&...>;
+			}(std::tuple<attribute_type...>{}),
 			"vertex_program must be invocable"
 		);
 
 		using vertex_program_res_type = decltype( //
 			vertex_program( //
-				std::declval<typename decltype(attribute)::value_type>()...
+				std::declval<r4::vector4<real>>(),
+				std::declval<attribute_type>()...
 			)
 		);
 
@@ -82,31 +84,17 @@ public:
 			"vertex program return type must be std::tuple"
 		);
 
-		std::array<vertex_program_res_type, 3> face{};
+		static_assert(
+			std::is_same_v<r4::vector4<real>, std::tuple_element_t<0, vertex_program_res_type>>,
+			"first element of vertex program return type must be r4::vector4<real>"
+		);
 
-		auto face_i = face.begin();
-		for (auto attr_iters = std::make_tuple(attribute.begin()...);
-			 std::get<0>(attr_iters) != std::get<0>(attrs_tuple).end();
-			 std::apply(
-				 [](auto&... i) {
-					 (..., ++i);
-				 },
-				 attr_iters
-			 ))
-		{
-			auto vertex_program_args_tuple = std::apply(
-				[](const auto&... i) {
-					return std::make_tuple((*i)...);
-				},
-				attr_iters
-			);
-
-			*face_i = std::apply(vertex_program, vertex_program_args_tuple);
-			++face_i;
-			if (face_i != face.end()) {
-				continue;
-			}
-			face_i = face.begin();
+		for (const auto& original_face : mesh.faces) {
+			std::array<vertex_program_res_type, 3> face{
+				std::apply(vertex_program, mesh.vertices[original_face[0]]),
+				std::apply(vertex_program, mesh.vertices[original_face[1]]),
+				std::apply(vertex_program, mesh.vertices[original_face[2]])
+			};
 
 			auto bb_segment =
 				calc_bounding_box_segment(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
@@ -128,6 +116,8 @@ public:
 					};
 
 					if (barycentric.is_positive_or_zero()) {
+						// pixel is inside of the face triangle
+
 						// normalize barycentric coordinates
 						auto area = edge_function(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
 						barycentric /= area;
@@ -155,7 +145,7 @@ public:
 							[]<typename... arg_type>(std::tuple<arg_type...>) constexpr {
 								return std::is_invocable_v<decltype(fragment_program), const arg_type&...>;
 							}(decltype(interpolated_attributes){}),
-							"vertex_program must be invocable"
+							"fragment_program must be invocable"
 						);
 
 						auto pixel_color = std::apply(fragment_program, interpolated_attributes);

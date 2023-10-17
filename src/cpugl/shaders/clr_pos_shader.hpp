@@ -37,8 +37,7 @@ public:
 	void render( //
 		context& ctx,
 		const r4::matrix4<real>& matrix,
-		utki::span<const r4::vector4<real>> pos,
-		utki::span<const r4::vector4<float>> clr
+		const mesh<r4::vector4<float>>& mesh
 	);
 };
 

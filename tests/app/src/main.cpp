@@ -103,16 +103,18 @@ int main(int argc, char **argv){
 					const std::vector<r4::vector4<cpugl::real>> vertices = {
 						{10, 10, 0, 1}, // NOLINT
 						{10, 500, 0, 1}, // NOLINT
+						{500, 500, 0, 1}, // NOLINT
 						{500, 10, 0, 1} // NOLINT
 					};
 
 					const std::vector<r4::vector4<float>> colors = {
 						{1, 0, 0, 1},
 						{0, 1, 0, 1},
-						{0, 0, 1, 1}
+						{0, 0, 1, 1},
+						{0, 1, 1, 1},
 					};
 
-					std::vector<r4::vector3<unsigned>> faces = {{0, 1, 2}};
+					std::vector<r4::vector3<unsigned>> faces = {{0, 1, 3}, {3, 1, 2}};
 
 					auto vao = cpugl::make_mesh(
 						std::move(faces),

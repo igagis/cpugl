@@ -89,11 +89,11 @@ public:
 			"first element of vertex program return type must be r4::vector4<real>"
 		);
 
-		for (const auto& original_face : mesh.faces) {
+		for (const auto& unprocessed_face : mesh.faces) {
 			std::array<vertex_program_res_type, 3> face{
-				std::apply(vertex_program, mesh.vertices[original_face[0]]),
-				std::apply(vertex_program, mesh.vertices[original_face[1]]),
-				std::apply(vertex_program, mesh.vertices[original_face[2]])
+				std::apply(vertex_program, mesh.vertices[unprocessed_face[0]]),
+				std::apply(vertex_program, mesh.vertices[unprocessed_face[1]]),
+				std::apply(vertex_program, mesh.vertices[unprocessed_face[2]])
 			};
 
 			auto bb_segment =
@@ -108,7 +108,7 @@ public:
 
 			auto p = bounding_box.p;
 			for (auto line : framebuffer_span) {
-				for (auto& px : line) {
+				for (auto& framebuffer_pixel : line) {
 					auto barycentric = r4::vector3<real>{
 						edge_function(std::get<0>(face[1]), std::get<0>(face[2]), p),
 						edge_function(std::get<0>(face[2]), std::get<0>(face[0]), p),
@@ -119,10 +119,9 @@ public:
 						// pixel is inside of the face triangle
 
 						// normalize barycentric coordinates
-						auto area = edge_function(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
-						barycentric /= area;
-
-						// interpolate attributes
+						auto triangle_area =
+							edge_function(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
+						barycentric /= triangle_area;
 
 						auto interpolated_attributes = //
 							[&b = barycentric, &f = face]<size_t... i>(std::index_sequence<i...>) {
@@ -150,7 +149,10 @@ public:
 
 						auto pixel_color = std::apply(fragment_program, interpolated_attributes);
 
-						px = rasterimage::to<std::remove_reference_t<decltype(px)>::value_type>(pixel_color);
+						using framebuffer_pixel_value_type =
+							std::remove_reference_t<decltype(framebuffer_pixel)>::value_type;
+
+						framebuffer_pixel = rasterimage::to<framebuffer_pixel_value_type>(pixel_color);
 					}
 
 					++p.x();

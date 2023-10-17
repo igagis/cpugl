@@ -37,7 +37,7 @@ public:
 	void render( //
 		context& ctx,
 		const r4::matrix4<real>& matrix,
-		cpugl::context::fb_image_type::pixel_type color,
+		const r4::vector4<float>& color,
 		const mesh<>& mesh
 	);
 };

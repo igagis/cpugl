@@ -33,7 +33,7 @@ using namespace cpugl;
 void color_pos_shader::render(
 	context& ctx,
 	const r4::matrix4<real>& matrix,
-	cpugl::context::fb_image_type::pixel_type color,
+	const r4::vector4<float>& color,
 	const mesh<>& mesh
 )
 {
@@ -43,8 +43,8 @@ void color_pos_shader::render(
 			const auto& pos = std::get<0>(attribute);
 			return std::make_tuple(matrix * pos);
 		},
-		[]() {
-			return r4::vector4<uint8_t>{0xff, 0, 0, 0xff}; // NOLINT
+		[&color]() {
+			return color;
 		},
 		mesh
 	);

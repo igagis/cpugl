@@ -35,7 +35,7 @@ SOFTWARE.
 namespace cpugl {
 
 template <typename... attribute_type>
-class vertex_array
+class mesh
 {
 public:
 	std::vector<std::tuple<attribute_type...>> vertices;
@@ -44,7 +44,7 @@ public:
 };
 
 template <typename... attribute_type>
-vertex_array<attribute_type...> make_vertex_array(
+mesh<attribute_type...> make_mesh(
 	std::vector<r4::vector3<unsigned>> faces,
 	utki::span<const attribute_type>... attribute
 )
@@ -54,7 +54,7 @@ vertex_array<attribute_type...> make_vertex_array(
 
 	auto attrs_tuple = std::make_tuple(attribute...);
 
-	vertex_array<attribute_type...> vao;
+	mesh<attribute_type...> vao;
 
 	vao.faces = std::move(faces);
 

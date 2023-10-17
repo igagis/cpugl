@@ -27,6 +27,7 @@ SOFTWARE.
 #pragma once
 
 #include "../context.hpp"
+#include "../mesh.hpp"
 
 namespace cpugl {
 

@@ -114,7 +114,7 @@ int main(int argc, char **argv){
 
 					std::vector<r4::vector3<unsigned>> faces = {{0, 1, 2}};
 
-					auto vao = cpugl::make_vertex_array(
+					auto vao = cpugl::make_mesh(
 						std::move(faces),
 						utki::make_span(vertices),
 						utki::make_span(colors)

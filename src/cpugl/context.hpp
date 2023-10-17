@@ -31,7 +31,6 @@ SOFTWARE.
 #include <utki/types.hpp>
 
 #include "config.hpp"
-#include "vertex_array.hpp"
 
 namespace cpugl {
 

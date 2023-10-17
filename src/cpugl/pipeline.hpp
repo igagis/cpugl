@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include "config.hpp"
 #include "context.hpp"
+#include "mesh.hpp"
 
 namespace cpugl {
 

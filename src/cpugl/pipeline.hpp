@@ -86,7 +86,7 @@ public:
 
 		static_assert(
 			std::is_same_v<r4::vector4<real>, std::tuple_element_t<0, vertex_program_res_type>>,
-			"first element of vertex program return type must be r4::vector4<real>"
+			"first element of vertex program return tuple must be r4::vector4<real>"
 		);
 
 		for (const auto& unprocessed_face : mesh.faces) {

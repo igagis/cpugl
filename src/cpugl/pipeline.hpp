@@ -58,7 +58,7 @@ class pipeline
 
 	static bool is_top_left(const r4::vector2<real>& edge)
 	{
-		return edge.y() > 0 || (edge.y() == 0 && edge.x() > 0);
+		return edge.y() > 0 || (edge.y() == 0 && edge.x() < 0);
 	}
 
 public:
@@ -112,10 +112,7 @@ public:
 
 			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
 
-			r4::rectangle<real> bounding_box = {
-				bb_segment.p1,
-				bb_segment.p2 - bb_segment.p1 + decltype(bb_segment.p1)(1) // +1 because segment is [p1, p2]
-			};
+			r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
 
 			auto framebuffer_span = ctx.get_framebuffer().span().subspan(bounding_box.to<unsigned>());
 
@@ -132,9 +129,10 @@ public:
 						edge_function(edge_0_1, p - v[0])
 					};
 
-					bool overlaps = (barycentric[0] > 0 || (barycentric[0] == 0 && is_top_left(edge_1_2)))
-						&& (barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0)))
-						&& (barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
+					bool overlaps = //
+						(barycentric[0] > 0 || (barycentric[0] == 0 && is_top_left(edge_1_2))) &&
+						(barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0))) &&
+						(barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
 
 					if (overlaps) {
 						// pixel is inside of the face triangle

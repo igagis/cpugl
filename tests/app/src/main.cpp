@@ -100,11 +100,16 @@ int main(int argc, char **argv){
 					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
 					glc.clear(bg_color);
 
+					constexpr auto l = 1;
+					constexpr auto t = 1;
+					constexpr auto r = 799;
+					constexpr auto b = 599;
+
 					const std::vector<r4::vector4<cpugl::real>> vertices = {
-						{10, 10, 0, 1}, // NOLINT
-						{10, 500, 0, 1}, // NOLINT
-						{500, 500, 0, 1}, // NOLINT
-						{500, 10, 0, 1} // NOLINT
+						{l, t, 0, 1},
+						{l, b, 0, 1},
+						{r, b, 0, 1},
+						{r, t, 0, 1}
 					};
 
 					const std::vector<r4::vector4<float>> colors = {
@@ -114,7 +119,10 @@ int main(int argc, char **argv){
 						{0, 1, 1, 1},
 					};
 
-					std::vector<r4::vector3<unsigned>> faces = {{0, 1, 3}, {3, 1, 2}};
+					std::vector<r4::vector3<unsigned>> faces = {
+						{0, 1, 3},
+						{3, 1, 2}
+					};
 
 					auto vao = cpugl::make_mesh(
 						std::move(faces),
@@ -126,7 +134,9 @@ int main(int argc, char **argv){
 
 					shader.render(
 						glc,
-						r4::matrix4<cpugl::real>().set_identity().translate(10, 0, 0), // NOLINT
+						r4::matrix4<cpugl::real>().set_identity()
+						//.translate(10, 0, 0)
+						, // NOLINT
 						vao
 					);
 
@@ -140,7 +150,7 @@ int main(int argc, char **argv){
 					});
 					
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast, cppcoreguidelines-pro-bounds-pointer-arithmetic)
-					XPutImage(display, window, DefaultGC(display, 0), ximage, 0, 0, 1, 1, fb.dims().x(), fb.dims().y());
+					XPutImage(display, window, DefaultGC(display, 0), ximage, 0, 0, 0, 0, fb.dims().x(), fb.dims().y());
 				}
 				break;
 			case KeyPress:

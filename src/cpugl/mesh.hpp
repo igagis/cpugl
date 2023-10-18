@@ -83,8 +83,8 @@ mesh<attribute_type...> make_mesh(
 		vao.faces.end(),
 		true,
 		[&vao](auto acc, auto face) {
-			return acc
-				&& std::accumulate( //
+			return acc &&
+				std::accumulate( //
 					   face.begin(),
 					   face.end(),
 					   true,

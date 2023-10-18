@@ -48,9 +48,9 @@ class pipeline
 		return {min(v0, min(v1, v2)), max(v0, max(v1, v2))};
 	}
 
-	static real edge_function(const r4::vector2<real>& a, const r4::vector2<real>& b, const r4::vector2<real>& c)
+	static real edge_function(const r4::vector2<real>& edge, const r4::vector2<real>& vec)
 	{
-		return (c - a).cross(b - a);
+		return vec.cross(edge);
 	}
 
 public:
@@ -109,18 +109,25 @@ public:
 			auto p = bounding_box.p;
 			for (auto line : framebuffer_span) {
 				for (auto& framebuffer_pixel : line) {
+					r4::vector2<real> v0 = std::get<0>(face[0]);
+					r4::vector2<real> v1 = std::get<0>(face[1]);
+					r4::vector2<real> v2 = std::get<0>(face[2]);
+
+					auto edge_0_1 = v1 - v0;
+					auto edge_1_2 = v2 - v1;
+					auto edge_2_0 = v0 - v2;
+
 					auto barycentric = r4::vector3<real>{
-						edge_function(std::get<0>(face[1]), std::get<0>(face[2]), p),
-						edge_function(std::get<0>(face[2]), std::get<0>(face[0]), p),
-						edge_function(std::get<0>(face[0]), std::get<0>(face[1]), p)
+						edge_function(edge_1_2, p - v1),
+						edge_function(edge_2_0, p - v2),
+						edge_function(edge_0_1, p - v0)
 					};
 
 					if (barycentric.is_positive_or_zero()) {
 						// pixel is inside of the face triangle
 
 						// normalize barycentric coordinates
-						auto triangle_area =
-							edge_function(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
+						auto triangle_area = edge_0_1.cross(edge_2_0);
 						barycentric /= triangle_area;
 
 						auto interpolated_attributes = //

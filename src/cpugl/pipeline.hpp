@@ -138,7 +138,7 @@ public:
 						// pixel is inside of the face triangle
 
 						// normalize barycentric coordinates
-						auto triangle_area = edge_0_1.cross(edge_2_0);
+						auto triangle_area = edge_function(edge_2_0, edge_0_1);
 						barycentric /= triangle_area;
 
 						auto interpolated_attributes = //

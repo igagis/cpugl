@@ -45,12 +45,20 @@ class pipeline
 		using std::min;
 		using std::max;
 
-		return {min(v0, min(v1, v2)), max(v0, max(v1, v2))};
+		return {
+			min(v0, min(v1, v2)), //
+			max(v0, max(v1, v2))
+		};
 	}
 
 	static real edge_function(const r4::vector2<real>& edge, const r4::vector2<real>& vec)
 	{
 		return vec.cross(edge);
+	}
+
+	static bool is_top_left(const r4::vector2<real>& edge)
+	{
+		return edge.y() > 0 || (edge.y() == 0 && edge.x() > 0);
 	}
 
 public:
@@ -96,8 +104,13 @@ public:
 				std::apply(vertex_program, mesh.vertices[unprocessed_face[2]])
 			};
 
-			auto bb_segment =
-				calc_bounding_box_segment(std::get<0>(face[0]), std::get<0>(face[1]), std::get<0>(face[2]));
+			std::array<r4::vector2<real>, 3> v = {
+				std::get<0>(face[0]), //
+				std::get<0>(face[1]),
+				std::get<0>(face[2])
+			};
+
+			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
 
 			r4::rectangle<real> bounding_box = {
 				bb_segment.p1,
@@ -109,21 +122,21 @@ public:
 			auto p = bounding_box.p;
 			for (auto line : framebuffer_span) {
 				for (auto& framebuffer_pixel : line) {
-					r4::vector2<real> v0 = std::get<0>(face[0]);
-					r4::vector2<real> v1 = std::get<0>(face[1]);
-					r4::vector2<real> v2 = std::get<0>(face[2]);
-
-					auto edge_0_1 = v1 - v0;
-					auto edge_1_2 = v2 - v1;
-					auto edge_2_0 = v0 - v2;
+					auto edge_0_1 = v[1] - v[0];
+					auto edge_1_2 = v[2] - v[1];
+					auto edge_2_0 = v[0] - v[2];
 
 					auto barycentric = r4::vector3<real>{
-						edge_function(edge_1_2, p - v1),
-						edge_function(edge_2_0, p - v2),
-						edge_function(edge_0_1, p - v0)
+						edge_function(edge_1_2, p - v[1]),
+						edge_function(edge_2_0, p - v[2]),
+						edge_function(edge_0_1, p - v[0])
 					};
 
-					if (barycentric.is_positive_or_zero()) {
+					bool overlaps = (barycentric[0] > 0 || (barycentric[0] == 0 && is_top_left(edge_1_2)))
+						&& (barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0)))
+						&& (barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
+
+					if (overlaps) {
 						// pixel is inside of the face triangle
 
 						// normalize barycentric coordinates

@@ -63,6 +63,22 @@
 			"group": "build"
 		},
 		{
+			"label": "run-cube",
+			"type": "shell",
+			"command": "make run-cube",
+			"dependsOn": "build",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "run-cube-dbg",
+			"type": "shell",
+			"command": "make run-cube config=dbg",
+			"dependsOn": "build-dbg",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
 			"label": "clean-all",
 			"type": "shell",
 			"command": "make clean-all",

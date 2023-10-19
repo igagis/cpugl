@@ -27,24 +27,6 @@ int main(int argc, char **argv){
 	// auto loadStart = utki::get_ticks_ms();
 #endif
 	
-	// auto dom = svgdom::load(papki::fs_file(filename));
-	// utki::assert(dom, SL);
-	
-	// LOG([&](auto&o){o << "SVG loaded in " << float(utki::get_ticks_ms() - loadStart) / 1000.0f << " sec." << std::endl;})
-	
-	// auto render_start_ms = utki::get_ticks_ms();
-	
-	// auto image = rasterimage::image_variant(svgren::rasterize(*dom));
-
-	// const auto& img = image.get<rasterimage::format::rgba>();
-	
-	// NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-	// utki::log([&](auto&o){o << "SVG rendered in " << float(utki::get_ticks_ms() - render_start_ms) / 1000.0f << " sec." << std::endl;});
-	
-	// utki::log([&](auto&o){o << "img.dims = " << img.dims() << " img.pixels.size() = " << img.pixels().size() << std::endl;});
-
-	// image.write_png(papki::fs_file(out_filename));
-	
 #if M_OS == M_OS_LINUX
 	constexpr auto width = 800;
 	constexpr auto height = 600;

@@ -11,7 +11,7 @@ this_cxxflags += -I ../../src
 
 this_cpugl_lib := ../../src/out/$(c)/libcpugl$(dot_so)
 
-this_ldlibs += -lutki $(this_cpugl_lib)
+this_ldlibs += -lutki $(this_cpugl_lib) -lm
 
 ifeq ($(os), macosx)
 else ifeq ($(os),windows)

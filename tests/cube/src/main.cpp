@@ -27,6 +27,9 @@ int main(int argc, char **argv){
 	// auto loadStart = utki::get_ticks_ms();
 #endif
 	
+	r4::matrix4<cpugl::real> matrix;
+	matrix.set_identity();
+
 	constexpr auto l = 1;
 	constexpr auto t = 1;
 	constexpr auto r = 799;
@@ -85,6 +88,7 @@ int main(int argc, char **argv){
 			default:
 				break;
 			case Expose:
+				std::cout << "Expose" << std::endl;
 				{
 					int dummy_int = 0;
 					unsigned dummy_unsigned = 0;
@@ -112,15 +116,11 @@ int main(int argc, char **argv){
 					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
 					glc.clear(bg_color);
 
-					
-
 					cpugl::clr_pos_shader shader;
 
 					shader.render(
 						glc,
-						r4::matrix4<cpugl::real>().set_identity()
-						//.translate(10, 0, 0)
-						, // NOLINT
+						matrix,
 						vao
 					);
 
@@ -138,6 +138,80 @@ int main(int argc, char **argv){
 				}
 				break;
 			case KeyPress:
+				{
+					constexpr auto esc_key = 9;
+					constexpr auto cursor_left_key = 113;
+					constexpr auto cursor_right_key = 114;
+					constexpr auto cursor_up_key = 111;
+					constexpr auto cursor_down_key = 116;
+					constexpr auto w_key = 25;
+					constexpr auto a_key = 38;
+					constexpr auto s_key = 39;
+					constexpr auto d_key = 40;
+					constexpr auto page_up_key = 112;
+					constexpr auto page_down_key = 117;
+
+					std::cout << "keycode = " << ev.xkey.keycode << std::endl;
+
+					constexpr auto translate_step = 10;
+					constexpr auto rotation_step_rad = utki::pi / 30;
+
+					switch(ev.xkey.keycode){
+						default:
+							break;
+						case esc_key:
+							exit(0);
+							break;
+						case cursor_left_key:
+							matrix.rotate(
+								r4::quaternion<cpugl::real>(
+									r4::vector3<cpugl::real>(0, 1, 0) * rotation_step_rad
+								)
+							);
+							break;
+						case cursor_right_key:
+							matrix.rotate(
+								r4::quaternion<cpugl::real>(
+									r4::vector3<cpugl::real>(0, -1, 0) * rotation_step_rad
+								)
+							);
+							break;
+						case cursor_up_key:
+							matrix.rotate(
+								r4::quaternion<cpugl::real>(
+									r4::vector3<cpugl::real>(-1, 0, 0) * rotation_step_rad
+								)
+							);
+							break;
+						case cursor_down_key:
+							matrix.rotate(
+								r4::quaternion<cpugl::real>(
+									r4::vector3<cpugl::real>(1, 0, 0) * rotation_step_rad
+								)
+							);
+							break;
+						case w_key:
+							matrix.translate(0, -translate_step, 0);
+							break;
+						case a_key:
+							matrix.translate(-translate_step, 0, 0);
+							break;
+						case s_key:
+							matrix.translate(0, translate_step, 0);
+							break;
+						case d_key:
+							matrix.translate(translate_step, 0, 0);
+							break;
+						case page_up_key:
+							matrix.translate(0, 0, translate_step);
+							break;
+						case page_down_key:
+							matrix.translate(0, 0, -translate_step);
+							break;
+					}
+				}
+				XClearArea(display, window, 0, 0, width, height, True);
+				break;
 			case ButtonPress:
 				exit(0);
 				break;

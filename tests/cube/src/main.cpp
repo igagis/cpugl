@@ -27,8 +27,8 @@ int main(int argc, char **argv){
 	// auto loadStart = utki::get_ticks_ms();
 #endif
 	
-	r4::matrix4<cpugl::real> matrix;
-	matrix.set_identity();
+	r4::vector3<cpugl::real> position{0, 0, 0};
+	auto rotation = r4::quaternion<cpugl::real>().set_identity();
 
 	constexpr auto l = 1;
 	constexpr auto t = 1;
@@ -118,6 +118,11 @@ int main(int argc, char **argv){
 
 					cpugl::clr_pos_shader shader;
 
+					r4::matrix4<cpugl::real> matrix;
+					matrix.set_identity();
+					matrix.translate(position);
+					matrix.rotate(rotation);
+
 					shader.render(
 						glc,
 						matrix,
@@ -163,50 +168,46 @@ int main(int argc, char **argv){
 							exit(0);
 							break;
 						case cursor_left_key:
-							matrix.rotate(
+							rotation *=
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(0, 1, 0) * rotation_step_rad
-								)
-							);
+								);
 							break;
 						case cursor_right_key:
-							matrix.rotate(
+							rotation *=
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(0, -1, 0) * rotation_step_rad
-								)
-							);
+								);
 							break;
 						case cursor_up_key:
-							matrix.rotate(
+							rotation *=
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(-1, 0, 0) * rotation_step_rad
-								)
-							);
+								);
 							break;
 						case cursor_down_key:
-							matrix.rotate(
+							rotation *=
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(1, 0, 0) * rotation_step_rad
-								)
-							);
+								);
 							break;
 						case w_key:
-							matrix.translate(0, -translate_step, 0);
+							position.y() -= translate_step;
 							break;
 						case a_key:
-							matrix.translate(-translate_step, 0, 0);
+							position.x() -= translate_step;
 							break;
 						case s_key:
-							matrix.translate(0, translate_step, 0);
+							position.y() += translate_step;
 							break;
 						case d_key:
-							matrix.translate(translate_step, 0, 0);
+							position.x() += translate_step;
 							break;
 						case page_up_key:
-							matrix.translate(0, 0, translate_step);
+							position.z() += translate_step;
 							break;
 						case page_down_key:
-							matrix.translate(0, 0, -translate_step);
+							position.z() -= translate_step;
 							break;
 					}
 				}

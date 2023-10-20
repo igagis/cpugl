@@ -23,10 +23,6 @@
 
 // NOLINTNEXTLINE(bugprone-exception-escape): fatal exceptions are not caught
 int main(int argc, char **argv){
-#ifdef DEBUG
-	// auto loadStart = utki::get_ticks_ms();
-#endif
-	
 	r4::vector3<cpugl::real> position{0, 0, 0};
 	auto rotation = r4::quaternion<cpugl::real>().set_identity();
 
@@ -60,7 +56,6 @@ int main(int argc, char **argv){
 		utki::make_span(colors)
 	);
 
-#if M_OS == M_OS_LINUX
 	constexpr auto width = 800;
 	constexpr auto height = 600;
 
@@ -218,5 +213,4 @@ int main(int argc, char **argv){
 				break;
 		}
 	}
-#endif
 }

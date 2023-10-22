@@ -163,28 +163,28 @@ int main(int argc, char **argv){
 							exit(0);
 							break;
 						case cursor_left_key:
-							rotation *=
+							rotation =
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(0, 1, 0) * rotation_step_rad
-								);
+								) * rotation;
 							break;
 						case cursor_right_key:
-							rotation *=
+							rotation =
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(0, -1, 0) * rotation_step_rad
-								);
+								) * rotation;
 							break;
 						case cursor_up_key:
-							rotation *=
+							rotation =
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(-1, 0, 0) * rotation_step_rad
-								);
+								) * rotation;
 							break;
 						case cursor_down_key:
-							rotation *=
+							rotation =
 								r4::quaternion<cpugl::real>(
 									r4::vector3<cpugl::real>(1, 0, 0) * rotation_step_rad
-								);
+								) * rotation;
 							break;
 						case w_key:
 							position.y() -= translate_step;

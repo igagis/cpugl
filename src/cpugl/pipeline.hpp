@@ -114,7 +114,12 @@ public:
 
 			r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
 
-			auto framebuffer_span = ctx.get_framebuffer().span().subspan(bounding_box.to<unsigned>());
+			auto& framebuffer = ctx.get_framebuffer();
+
+			// clamp bounding box to framebuffer boundaries
+			bounding_box.intersect({{0, 0}, framebuffer.dims().to<cpugl::real>()});
+
+			auto framebuffer_span = framebuffer.span().subspan(bounding_box.to<unsigned>());
 
 			auto p = bounding_box.p;
 			for (auto line : framebuffer_span) {

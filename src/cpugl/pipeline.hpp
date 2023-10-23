@@ -110,6 +110,10 @@ public:
 				std::get<0>(face[2])
 			};
 
+			auto edge_0_1 = v[1] - v[0];
+			auto edge_1_2 = v[2] - v[1];
+			auto edge_2_0 = v[0] - v[2];
+
 			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
 
 			r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
@@ -124,10 +128,6 @@ public:
 			auto p = bounding_box.p;
 			for (auto line : framebuffer_span) {
 				for (auto& framebuffer_pixel : line) {
-					auto edge_0_1 = v[1] - v[0];
-					auto edge_1_2 = v[2] - v[1];
-					auto edge_2_0 = v[0] - v[2];
-
 					auto barycentric = r4::vector3<real>{
 						edge_function(edge_1_2, p - v[1]),
 						edge_function(edge_2_0, p - v[2]),

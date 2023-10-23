@@ -140,7 +140,10 @@ public:
 
 			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
 
-			r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
+			using std::floor;
+			using std::ceil;
+
+			r4::rectangle<real> bounding_box = {floor(bb_segment.p1), ceil(bb_segment.p2 - bb_segment.p1)};
 
 			auto& framebuffer = ctx.get_framebuffer();
 
@@ -150,6 +153,10 @@ public:
 			auto framebuffer_span = framebuffer.span().subspan(bounding_box.to<unsigned>());
 
 			auto p = bounding_box.p;
+			// std::cout << "p = " << p << std::endl;
+			// using std::floor;
+			// p = floor(p);
+			// std::cout << "p = " << p << std::endl;
 			for (auto line : framebuffer_span) {
 				for (auto& framebuffer_pixel : line) {
 					auto barycentric = r4::vector3<real>{

@@ -114,14 +114,23 @@ public:
 			auto edge_1_2 = v[2] - v[1];
 			auto edge_2_0 = v[0] - v[2];
 
-			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
-
-			r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
-
 			auto& framebuffer = ctx.get_framebuffer();
 
+			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
+
+			using std::floor;
+			using std::ceil;
+			using std::min;
+			using std::max;
+
+			bb_segment.p1 = floor(bb_segment.p1);
+			bb_segment.p2 = ceil(bb_segment.p2);
+
 			// clamp bounding box to framebuffer boundaries
-			bounding_box.intersect({{0, 0}, framebuffer.dims().to<cpugl::real>()});
+			bb_segment.p1 = max(bb_segment.p1, 0);
+			bb_segment.p2 = min(bb_segment.p2, framebuffer.dims().to<real>());
+
+			r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
 
 			auto framebuffer_span = framebuffer.span().subspan(bounding_box.to<unsigned>());
 
@@ -140,8 +149,6 @@ public:
 						(barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
 
 					if (overlaps) {
-						// pixel is inside of the face triangle
-
 						// normalize barycentric coordinates
 						auto triangle_area = edge_function(edge_2_0, edge_0_1);
 						barycentric /= triangle_area;

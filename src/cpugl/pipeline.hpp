@@ -163,9 +163,9 @@ public:
 						// (barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0))) &&
 						// (barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
 
-						(edge_1_2.inverted ? barycentric[0] < 0 : barycentric[0] >= 0) &&
-						(edge_2_0.inverted ? barycentric[1] < 0 : barycentric[1] >= 0) &&
-						(edge_0_1.inverted ? barycentric[2] < 0 : barycentric[2] >= 0);
+						(edge_1_2.inverted ? barycentric[0] <= 0 : barycentric[0] >= 0) &&
+						(edge_2_0.inverted ? barycentric[1] <= 0 : barycentric[1] >= 0) &&
+						(edge_0_1.inverted ? barycentric[2] <= 0 : barycentric[2] >= 0);
 
 					// barycentric.is_positive_or_zero();
 
@@ -179,6 +179,8 @@ public:
 						}
 						ASSERT(triangle_area >= 0)
 						barycentric /= triangle_area;
+						using std::abs;
+						barycentric = abs(barycentric);
 
 						auto interpolated_attributes = //
 							[&b = barycentric, &f = face]<size_t... i>(std::index_sequence<i...>) {

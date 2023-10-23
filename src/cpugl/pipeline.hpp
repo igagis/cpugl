@@ -174,10 +174,6 @@ public:
 
 						// normalize barycentric coordinates
 						auto triangle_area = edge_function(edge_2_0.vector, edge_0_1.vector);
-						if(edge_2_0.inverted != edge_0_1.inverted){
-							triangle_area = -triangle_area;
-						}
-						ASSERT(triangle_area >= 0)
 						barycentric /= triangle_area;
 						using std::abs;
 						barycentric = abs(barycentric);

@@ -110,9 +110,33 @@ public:
 				std::get<0>(face[2])
 			};
 
-			auto edge_0_1 = v[1] - v[0];
-			auto edge_1_2 = v[2] - v[1];
-			auto edge_2_0 = v[0] - v[2];
+			struct edge_info
+			{
+				r4::vector2<real> begin;
+				r4::vector2<real> vector;
+				bool inverted;
+			};
+			
+			auto calc_edge = [](r4::vector2<real> begin, r4::vector2<real> end) -> edge_info{
+				// sort begin, end by X and then by Y
+				if(begin.x() < end.x() || (begin.x() == end.x() && begin.y() < end.y())){
+					return {
+						.begin = begin,
+						.vector = end - begin,
+						.inverted = false
+					};
+				}else{
+					return {
+						.begin = end,
+						.vector = begin - end,
+						.inverted = true
+					};
+				}
+			};
+
+			auto edge_0_1 = calc_edge(v[0], v[1]);
+			auto edge_1_2 = calc_edge(v[1], v[2]);
+			auto edge_2_0 = calc_edge(v[2], v[0]);
 
 			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
 
@@ -129,21 +153,31 @@ public:
 			for (auto line : framebuffer_span) {
 				for (auto& framebuffer_pixel : line) {
 					auto barycentric = r4::vector3<real>{
-						edge_function(edge_1_2, p - v[1]),
-						edge_function(edge_2_0, p - v[2]),
-						edge_function(edge_0_1, p - v[0])
+						edge_function(edge_1_2.vector, p - edge_1_2.begin),
+						edge_function(edge_2_0.vector, p - edge_2_0.begin),
+						edge_function(edge_0_1.vector, p - edge_0_1.begin)
 					};
 
 					bool overlaps = //
-						(barycentric[0] > 0 || (barycentric[0] == 0 && is_top_left(edge_1_2))) &&
-						(barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0))) &&
-						(barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
+						// (barycentric[0] > 0 || (barycentric[0] == 0 && is_top_left(edge_1_2))) &&
+						// (barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0))) &&
+						// (barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
+
+						(edge_1_2.inverted ? barycentric[0] < 0 : barycentric[0] >= 0) &&
+						(edge_2_0.inverted ? barycentric[1] < 0 : barycentric[1] >= 0) &&
+						(edge_0_1.inverted ? barycentric[2] < 0 : barycentric[2] >= 0);
+
+					// barycentric.is_positive_or_zero();
 
 					if (overlaps) {
 						// pixel is inside of the face triangle
 
 						// normalize barycentric coordinates
-						auto triangle_area = edge_function(edge_2_0, edge_0_1);
+						auto triangle_area = edge_function(edge_2_0.vector, edge_0_1.vector);
+						if(edge_2_0.inverted != edge_0_1.inverted){
+							triangle_area = -triangle_area;
+						}
+						ASSERT(triangle_area >= 0)
 						barycentric /= triangle_area;
 
 						auto interpolated_attributes = //

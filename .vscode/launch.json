@@ -23,6 +23,26 @@
                 }
             ],
             "preLaunchTask": "build-dbg"
+        },
+        {
+            "name": "(gdb) cube",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/cube/out/dbg/cube",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/tests/cube",
+            "environment": [{"name": "LD_LIBRARY_PATH", "value": "../../src/out/dbg"}],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build-dbg"
         }
     ]
 }

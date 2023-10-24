@@ -24,22 +24,21 @@ SOFTWARE.
 
 /* ================ LICENSE END ================ */
 
-#include "clr_pos_shader.hpp"
+#pragma once
 
-#include "../pipeline.hpp"
+#include "../context.hpp"
+#include "../mesh.hpp"
 
-using namespace cpugl;
+namespace cpugl {
 
-void clr_pos_shader::render(context& ctx, const r4::matrix4<real>& matrix, const mesh<r4::vector4<float>>& mesh)
+class pos_clr_shader
 {
-	pipeline::render<false>( // false = no depth test
-		ctx,
-		[&matrix](const r4::vector4<real>& pos, const r4::vector4<float>& clr) {
-			return std::make_tuple(matrix * pos, clr);
-		},
-		[](const auto& clr) {
-			return clr;
-		},
-		mesh
+public:
+	void render( //
+		context& ctx,
+		const r4::matrix4<real>& matrix,
+		const mesh<r4::vector4<float>>& mesh
 	);
-}
+};
+
+} // namespace cpugl

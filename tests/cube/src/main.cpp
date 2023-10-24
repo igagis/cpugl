@@ -6,7 +6,7 @@
 
 #include <papki/fs_file.hpp>
 
-#include <cpugl/shaders/clr_pos_shader.hpp>
+#include <cpugl/shaders/pos_clr_shader.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -111,7 +111,7 @@ int main(int argc, char **argv){
 					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
 					glc.clear(bg_color);
 
-					cpugl::clr_pos_shader shader;
+					cpugl::pos_clr_shader shader;
 
 					r4::matrix4<cpugl::real> matrix;
 					matrix.set_identity();

@@ -116,9 +116,7 @@ int main(int argc, char **argv){
 
 					shader.render(
 						glc,
-						r4::matrix4<cpugl::real>().set_identity()
-						//.translate(10, 0, 0)
-						, // NOLINT
+						r4::matrix4<cpugl::real>().set_identity(),
 						vao
 					);
 

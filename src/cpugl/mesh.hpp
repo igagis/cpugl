@@ -54,7 +54,9 @@ mesh<attribute_type...> make_mesh(
 )
 {
 	// all spans must be of the same size
-	ASSERT(pos.size() == (... == attribute.size()))
+	if constexpr (sizeof...(attribute) != 0){
+		ASSERT(pos.size() == (... == attribute.size()))
+	}
 
 	mesh<attribute_type...> vao;
 

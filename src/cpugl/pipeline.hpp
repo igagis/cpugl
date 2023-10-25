@@ -61,6 +61,101 @@ class pipeline
 		return edge.y() > 0 || (edge.y() == 0 && edge.x() < 0);
 	}
 
+	template <bool depth_test, typename fragment_program_type, typename vertex_program_res_type>
+	static void rasterize(
+		context& ctx,
+		const fragment_program_type& fragment_program,
+		const std::array<vertex_program_res_type, 3>& face
+	)
+	{
+		std::array<r4::vector2<real>, 3> v = {
+			std::get<0>(face[0]), //
+			std::get<0>(face[1]),
+			std::get<0>(face[2])
+		};
+
+		auto edge_0_1 = v[1] - v[0];
+		auto edge_1_2 = v[2] - v[1];
+		auto edge_2_0 = v[0] - v[2];
+
+		auto& framebuffer = ctx.get_framebuffer();
+
+		auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
+
+		using std::floor;
+		using std::ceil;
+		using std::min;
+		using std::max;
+
+		bb_segment.p1 = floor(bb_segment.p1);
+		bb_segment.p2 = ceil(bb_segment.p2);
+
+		// clamp bounding box to framebuffer boundaries
+		bb_segment.p1 = max(bb_segment.p1, 0);
+		bb_segment.p2 = min(bb_segment.p2, framebuffer.dims().to<real>());
+
+		r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
+
+		auto framebuffer_span = framebuffer.span().subspan(bounding_box.to<unsigned>());
+
+		auto p = bounding_box.p;
+		for (auto line : framebuffer_span) {
+			for (auto& framebuffer_pixel : line) {
+				auto barycentric = r4::vector3<real>{
+					edge_function(edge_1_2, p - v[1]),
+					edge_function(edge_2_0, p - v[2]),
+					edge_function(edge_0_1, p - v[0])
+				};
+
+				bool overlaps = //
+					(barycentric[0] > 0 || (barycentric[0] == 0 && is_top_left(edge_1_2))) &&
+					(barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0))) &&
+					(barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
+
+				if (overlaps) {
+					// normalize barycentric coordinates
+					auto triangle_area = edge_function(edge_2_0, edge_0_1);
+					barycentric /= triangle_area;
+
+					auto interpolated_attributes = //
+						[&b = barycentric, &f = face]<size_t... i>(std::index_sequence<i...>) {
+							return std::make_tuple(
+								(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2])...
+							);
+						}(utki::offset_sequence_t<
+							1,
+							std::make_index_sequence< //
+								std::tuple_size_v<vertex_program_res_type> - 1 //
+								> //
+							>{});
+
+					static_assert(
+						utki::is_specialization_of_v<std::tuple, decltype(interpolated_attributes)>,
+						"interpolated_attributes type must be std::tuple"
+					);
+
+					static_assert(
+						[]<typename... arg_type>(std::tuple<arg_type...>) constexpr {
+							return std::is_invocable_v<decltype(fragment_program), const arg_type&...>;
+						}(decltype(interpolated_attributes){}),
+						"fragment_program must be invocable"
+					);
+
+					auto pixel_color = std::apply(fragment_program, interpolated_attributes);
+
+					using framebuffer_pixel_value_type =
+						std::remove_reference_t<decltype(framebuffer_pixel)>::value_type;
+
+					framebuffer_pixel = rasterimage::to<framebuffer_pixel_value_type>(pixel_color);
+				}
+
+				++p.x();
+			}
+			p.x() = bounding_box.p.x();
+			++p.y();
+		}
+	}
+
 public:
 	// Rasterization tutorial:
 	// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
@@ -104,92 +199,7 @@ public:
 				std::apply(vertex_program, mesh.vertices[unprocessed_face[2]])
 			};
 
-			std::array<r4::vector2<real>, 3> v = {
-				std::get<0>(face[0]), //
-				std::get<0>(face[1]),
-				std::get<0>(face[2])
-			};
-
-			auto edge_0_1 = v[1] - v[0];
-			auto edge_1_2 = v[2] - v[1];
-			auto edge_2_0 = v[0] - v[2];
-
-			auto& framebuffer = ctx.get_framebuffer();
-
-			auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
-
-			using std::floor;
-			using std::ceil;
-			using std::min;
-			using std::max;
-
-			bb_segment.p1 = floor(bb_segment.p1);
-			bb_segment.p2 = ceil(bb_segment.p2);
-
-			// clamp bounding box to framebuffer boundaries
-			bb_segment.p1 = max(bb_segment.p1, 0);
-			bb_segment.p2 = min(bb_segment.p2, framebuffer.dims().to<real>());
-
-			r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
-
-			auto framebuffer_span = framebuffer.span().subspan(bounding_box.to<unsigned>());
-
-			auto p = bounding_box.p;
-			for (auto line : framebuffer_span) {
-				for (auto& framebuffer_pixel : line) {
-					auto barycentric = r4::vector3<real>{
-						edge_function(edge_1_2, p - v[1]),
-						edge_function(edge_2_0, p - v[2]),
-						edge_function(edge_0_1, p - v[0])
-					};
-
-					bool overlaps = //
-						(barycentric[0] > 0 || (barycentric[0] == 0 && is_top_left(edge_1_2))) &&
-						(barycentric[1] > 0 || (barycentric[1] == 0 && is_top_left(edge_2_0))) &&
-						(barycentric[2] > 0 || (barycentric[2] == 0 && is_top_left(edge_0_1)));
-
-					if (overlaps) {
-						// normalize barycentric coordinates
-						auto triangle_area = edge_function(edge_2_0, edge_0_1);
-						barycentric /= triangle_area;
-
-						auto interpolated_attributes = //
-							[&b = barycentric, &f = face]<size_t... i>(std::index_sequence<i...>) {
-								return std::make_tuple(
-									(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2])...
-								);
-							}(utki::offset_sequence_t<
-								1,
-								std::make_index_sequence< //
-									std::tuple_size_v<vertex_program_res_type> - 1 //
-									> //
-								>{});
-
-						static_assert(
-							utki::is_specialization_of_v<std::tuple, decltype(interpolated_attributes)>,
-							"interpolated_attributes type must be std::tuple"
-						);
-
-						static_assert(
-							[]<typename... arg_type>(std::tuple<arg_type...>) constexpr {
-								return std::is_invocable_v<decltype(fragment_program), const arg_type&...>;
-							}(decltype(interpolated_attributes){}),
-							"fragment_program must be invocable"
-						);
-
-						auto pixel_color = std::apply(fragment_program, interpolated_attributes);
-
-						using framebuffer_pixel_value_type =
-							std::remove_reference_t<decltype(framebuffer_pixel)>::value_type;
-
-						framebuffer_pixel = rasterimage::to<framebuffer_pixel_value_type>(pixel_color);
-					}
-
-					++p.x();
-				}
-				p.x() = bounding_box.p.x();
-				++p.y();
-			}
+			rasterize<depth_test>(ctx, fragment_program, face);
 		}
 	}
 };

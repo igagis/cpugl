@@ -37,6 +37,9 @@ SOFTWARE.
 
 namespace cpugl {
 
+using tex_coord_type = r4::vector2<real>;
+using color_type = r4::vector4<real>;
+
 template <typename... attribute_type>
 class mesh
 {

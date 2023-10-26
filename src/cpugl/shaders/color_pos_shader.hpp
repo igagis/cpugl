@@ -37,7 +37,7 @@ public:
 	void render( //
 		context& ctx,
 		const r4::matrix4<real>& matrix,
-		const r4::vector4<float>& color,
+		const color_type& color,
 		const mesh<>& mesh
 	);
 };

@@ -30,7 +30,7 @@ SOFTWARE.
 
 using namespace cpugl;
 
-void pos_clr_shader::render(context& ctx, const r4::matrix4<real>& matrix, const mesh<r4::vector4<float>>& mesh)
+void pos_clr_shader::render(context& ctx, const r4::matrix4<real>& matrix, const mesh<color_type>& mesh)
 {
 	pipeline::render<false>( // false = no depth test
 		ctx,

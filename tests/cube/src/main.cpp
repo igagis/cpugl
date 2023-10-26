@@ -39,11 +39,18 @@ int main(int argc, char **argv){
 		{r, t, 0, 1}
 	};
 
-	const std::vector<r4::vector4<float>> colors = {
+	const std::vector<r4::vector4<cpugl::real>> colors = {
 		{1, 0, 0, 1},
 		{0, 1, 0, 1},
 		{0, 0, 1, 1},
 		{0, 1, 1, 1},
+	};
+
+	const std::vector<r4::vector2<cpugl::real>> tex_coords = {
+		{0, 0},
+		{0, 1},
+		{1, 1},
+		{1, 0}
 	};
 
 	std::vector<std::array<unsigned, 3>> faces = {

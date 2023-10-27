@@ -23,7 +23,7 @@ void texture_pos_tex_shader::render( //
                         return std::make_tuple(matrix * pos, tex_coord);
                     },
                     [&tex](const r4::vector2<real>& tex_coord){
-                        return tex.get(tex_coord);
+                        return rasterimage::get_rgba(tex.get(tex_coord));
                     },
                     mesh
                 );

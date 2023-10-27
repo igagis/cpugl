@@ -24,8 +24,10 @@ public:
 
 	const image_type::pixel_type& get(const r4::vector2<real>& tex_coords) const
 	{
-		// TODO:
-		return image[0][0];
+		ASSERT(tex_coords.is_positive_or_zero())
+		ASSERT(tex_coords.x() <= 1 && tex_coords.y() <= 1)
+		auto tc = this->dims.comp_mul(tex_coords).to<unsigned>();
+		return image[tc.y()][tc.x()];
 	}
 };
 

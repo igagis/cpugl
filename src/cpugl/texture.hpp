@@ -27,7 +27,10 @@ public:
 		ASSERT(tex_coords.is_positive_or_zero())
 		ASSERT(tex_coords.x() <= 1 && tex_coords.y() <= 1)
 		auto tc = this->dims.comp_mul(tex_coords).to<unsigned>();
-		return image[tc.y()][tc.x()];
+		ASSERT(tc.x() <= this->image.dims().x())
+		ASSERT(tc.y() <= this->image.dims().y())
+		tc = std::min(tc, this->image.dims());
+		return this->image[tc.y()][tc.x()];
 	}
 };
 

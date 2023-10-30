@@ -32,9 +32,9 @@ int main(int argc, char **argv){
 
 	constexpr auto l = 0;
 	constexpr auto t = 0;
-	constexpr auto r = 200;
-	constexpr auto b = 100;
-	constexpr auto d = 50;
+	constexpr auto r = 4;
+	constexpr auto b = 2;
+	constexpr auto d = 1;
 
 	auto tex = rasterimage::read_jpeg(papki::fs_file("texture.jpg"));
 
@@ -183,15 +183,19 @@ int main(int argc, char **argv){
 					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
 					glc.clear(bg_color);
 
-					// cpugl::pos_clr_shader shader;
-					// cpugl::color_pos_shader shader;
-
 					r4::matrix4<cpugl::real> matrix;
 					matrix.set_identity();
+
+					matrix.scale(width / 2, height / 2);
+					matrix.translate(1, 1, 0);
+					matrix.translate(0, 0, 1);
+
+					matrix.frustum(-2, 2, -1.5, 1.5, 2, 100);
+					matrix.translate(0, 0, 4);
+
 					matrix.translate(position);
 					matrix.rotate(rotation);
 
-					// shader.render(
 					cpugl::texture_pos_tex_shader::render(
 						glc,
 						matrix,
@@ -228,7 +232,7 @@ int main(int argc, char **argv){
 
 					std::cout << "keycode = " << ev.xkey.keycode << std::endl;
 
-					constexpr auto translate_step = 10;
+					constexpr auto translate_step = 0.5;
 					constexpr auto rotation_step_rad = utki::pi / 30;
 
 					switch(ev.xkey.keycode){

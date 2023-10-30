@@ -69,9 +69,9 @@ class pipeline
 	)
 	{
 		std::array<r4::vector2<real>, 3> v = {
-			std::get<0>(face[0]), //
-			std::get<0>(face[1]),
-			std::get<0>(face[2])
+			std::get<0>(face[0]) / std::get<0>(face[0]).w(), //
+			std::get<0>(face[1]) / std::get<0>(face[1]).w(),
+			std::get<0>(face[2]) / std::get<0>(face[2]).w()
 		};
 
 		auto edge_0_1 = v[1] - v[0];

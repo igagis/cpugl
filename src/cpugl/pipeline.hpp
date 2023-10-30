@@ -78,6 +78,13 @@ class pipeline
 		auto edge_1_2 = v[2] - v[1];
 		auto edge_2_0 = v[0] - v[2];
 
+		auto triangle_area = edge_function(edge_2_0, edge_0_1);
+
+		if (triangle_area <= 0) {
+			// triangle is facing away
+			return;
+		}
+
 		auto& framebuffer = ctx.get_framebuffer();
 
 		auto bb_segment = calc_bounding_box_segment(v[0], v[1], v[2]);
@@ -93,8 +100,17 @@ class pipeline
 
 		auto uint_bb_segment = r4::segment2<uint32_t>(bb_segment.p1.to<uint32_t>(), bb_segment.p2.to<uint32_t>());
 
+		ASSERT(uint_bb_segment.p1.x() <= uint_bb_segment.p2.x())
+		ASSERT(uint_bb_segment.p1.y() <= uint_bb_segment.p2.y())
+
+		if (uint_bb_segment.p1.x() >= framebuffer.dims().x() || //
+			uint_bb_segment.p1.y() >= framebuffer.dims().y())
+		{
+			// bounding box lies outside of the screen
+			return;
+		}
+
 		// clamp bounding box to framebuffer boundaries
-		uint_bb_segment.p1 = min(uint_bb_segment.p1, framebuffer.dims());
 		uint_bb_segment.p2 = min(uint_bb_segment.p2, framebuffer.dims());
 
 		r4::rectangle<uint32_t> bounding_box{uint_bb_segment.p1, uint_bb_segment.p2 - uint_bb_segment.p1};
@@ -117,7 +133,6 @@ class pipeline
 
 				if (overlaps) {
 					// normalize barycentric coordinates
-					auto triangle_area = edge_function(edge_2_0, edge_0_1);
 					barycentric /= triangle_area;
 
 					auto interpolated_attributes = //

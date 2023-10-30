@@ -87,18 +87,21 @@ class pipeline
 		using std::min;
 		using std::max;
 
-		bb_segment.p1 = floor(bb_segment.p1);
-		bb_segment.p2 = ceil(bb_segment.p2);
+		// round and clamp to positive values
+		bb_segment.p1 = max(floor(bb_segment.p1), 0);
+		bb_segment.p2 = max(ceil(bb_segment.p2), 0);
+
+		auto uint_bb_segment = r4::segment2<uint32_t>(bb_segment.p1.to<uint32_t>(), bb_segment.p2.to<uint32_t>());
 
 		// clamp bounding box to framebuffer boundaries
-		bb_segment.p1 = max(bb_segment.p1, 0);
-		bb_segment.p2 = min(bb_segment.p2, framebuffer.dims().to<real>());
+		uint_bb_segment.p1 = min(uint_bb_segment.p1, framebuffer.dims());
+		uint_bb_segment.p2 = min(uint_bb_segment.p2, framebuffer.dims());
 
-		r4::rectangle<real> bounding_box = {bb_segment.p1, bb_segment.p2 - bb_segment.p1};
+		r4::rectangle<uint32_t> bounding_box{uint_bb_segment.p1, uint_bb_segment.p2 - uint_bb_segment.p1};
 
-		auto framebuffer_span = framebuffer.span().subspan(bounding_box.to<unsigned>());
+		auto framebuffer_span = framebuffer.span().subspan(bounding_box);
 
-		auto p = bounding_box.p;
+		auto p = bounding_box.p.to<real>();
 		for (auto line : framebuffer_span) {
 			for (auto& framebuffer_pixel : line) {
 				auto barycentric = r4::vector3<real>{

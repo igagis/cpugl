@@ -188,14 +188,17 @@ int main(int argc, char **argv){
 
 					matrix.scale(width / 2, height / 2);
 					matrix.translate(1, 1, 0);
-					matrix.translate(0, 0, 1);
-					// matrix.scale(1, -1, -1);
+
+					matrix.scale(-1, -1, 1); // look to opposite z-direction
+					matrix.translate(0, 0, 1); // move projection plane to (0, 0, 0)
 
 					matrix.frustum(-2, 2, -1.5, 1.5, 2, 100);
 					matrix.translate(0, 0, 4);
 
 					matrix.translate(position);
 					matrix.rotate(rotation);
+
+					// matrix.scale(width / 2, height / 2);
 
 					cpugl::texture_pos_tex_shader::render(
 						glc,

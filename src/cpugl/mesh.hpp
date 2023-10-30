@@ -58,7 +58,12 @@ mesh<attribute_type...> make_mesh(
 {
 	// all spans must be of the same size
 	if constexpr (sizeof...(attribute) != 0) {
-		ASSERT(pos.size() == (... == attribute.size()))
+		ASSERT(
+			pos.size() == (... == attribute.size()), //
+			[](auto& o) {
+				o << "make_mesh(): all attribute buffers must be of the same size";
+			}
+		)
 	}
 
 	mesh<attribute_type...> vao;

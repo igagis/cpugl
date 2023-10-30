@@ -30,18 +30,88 @@ int main(int argc, char **argv){
 	r4::vector3<cpugl::real> position{0, 0, 0};
 	auto rotation = r4::quaternion<cpugl::real>().set_identity();
 
-	constexpr auto l = 1;
-	constexpr auto t = 1;
-	constexpr auto r = 799;
-	constexpr auto b = 599;
+	constexpr auto l = 0;
+	constexpr auto t = 0;
+	constexpr auto r = 200;
+	constexpr auto b = 100;
+	constexpr auto d = 50;
 
 	auto tex = rasterimage::read_jpeg(papki::fs_file("texture.jpg"));
 
 	const std::vector<r4::vector4<cpugl::real>> vertices = {
+		// front
 		{l, t, 0, 1},
 		{l, b, 0, 1},
 		{r, b, 0, 1},
-		{r, t, 0, 1}
+		{r, t, 0, 1},
+
+		// back
+		{l, t, d, 1},
+		{l, b, d, 1},
+		{r, b, d, 1},
+		{r, t, d, 1},
+
+		// left
+		{l, t, 0, 1},
+		{l, b, 0, 1},
+		{l, b, d, 1},
+		{l, t, d, 1},
+
+		// right
+		{r, t, 0, 1},
+		{r, b, 0, 1},
+		{r, b, d, 1},
+		{r, t, d, 1},
+
+		// top
+		{l, t, 0, 1},
+		{l, t, d, 1},
+		{r, t, d, 1},
+		{r, t, 0, 1},
+	};
+
+	std::vector<std::array<unsigned, 3>> faces = {
+		{0, 1, 3},
+		{3, 1, 2},
+
+		{7, 5, 4},
+		{6, 5, 7},
+
+		{11, 9, 8},
+		{10, 9, 11},
+
+		{12, 13, 15},
+		{15, 13, 14},
+
+		{19, 17, 16},
+		{18, 17, 19},
+	};
+
+	const std::vector<r4::vector2<cpugl::real>> tex_coords = {
+		{0, 0},
+		{0, 1},
+		{1, 1},
+		{1, 0},
+
+		{0, 0},
+		{0, 1},
+		{1, 1},
+		{1, 0},
+
+		{0, 0},
+		{0, 1},
+		{1, 1},
+		{1, 0},
+
+		{0, 0},
+		{0, 1},
+		{1, 1},
+		{1, 0},
+
+		{0, 0},
+		{0, 1},
+		{1, 1},
+		{1, 0},
 	};
 
 	const std::vector<r4::vector4<cpugl::real>> colors = {
@@ -49,18 +119,6 @@ int main(int argc, char **argv){
 		{0, 1, 0, 1},
 		{0, 0, 1, 1},
 		{0, 1, 1, 1},
-	};
-
-	const std::vector<r4::vector2<cpugl::real>> tex_coords = {
-		{0, 0},
-		{0, 1},
-		{1, 1},
-		{1, 0}
-	};
-
-	std::vector<std::array<unsigned, 3>> faces = {
-		{0, 1, 3},
-		{3, 1, 2}
 	};
 
 	auto vao = cpugl::make_mesh(

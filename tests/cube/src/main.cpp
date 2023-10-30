@@ -30,20 +30,20 @@ int main(int argc, char **argv){
 	r4::vector3<cpugl::real> position{0, 0, 0};
 	auto rotation = r4::quaternion<cpugl::real>().set_identity();
 
-	constexpr auto l = 0;
-	constexpr auto t = 0;
-	constexpr auto r = 4;
-	constexpr auto b = 2;
+	constexpr auto l = -1;
+	constexpr auto t = -1;
+	constexpr auto r = 1;
+	constexpr auto b = 1;
 	constexpr auto d = 1;
 
 	auto tex = rasterimage::read_jpeg(papki::fs_file("texture.jpg"));
 
 	const std::vector<r4::vector4<cpugl::real>> vertices = {
 		// front
-		{l, t, 0, 1},
-		{l, b, 0, 1},
-		{r, b, 0, 1},
-		{r, t, 0, 1},
+		{l, t, -d, 1},
+		{l, b, -d, 1},
+		{r, b, -d, 1},
+		{r, t, -d, 1},
 
 		// back
 		{l, t, d, 1},
@@ -52,22 +52,22 @@ int main(int argc, char **argv){
 		{r, t, d, 1},
 
 		// left
-		{l, t, 0, 1},
-		{l, b, 0, 1},
+		{l, t, -d, 1},
+		{l, b, -d, 1},
 		{l, b, d, 1},
 		{l, t, d, 1},
 
 		// right
-		{r, t, 0, 1},
-		{r, b, 0, 1},
+		{r, t, -d, 1},
+		{r, b, -d, 1},
 		{r, b, d, 1},
 		{r, t, d, 1},
 
 		// top
-		{l, t, 0, 1},
+		{l, t, -d, 1},
 		{l, t, d, 1},
 		{r, t, d, 1},
-		{r, t, 0, 1},
+		{r, t, -d, 1},
 	};
 
 	std::vector<std::array<unsigned, 3>> faces = {
@@ -189,6 +189,7 @@ int main(int argc, char **argv){
 					matrix.scale(width / 2, height / 2);
 					matrix.translate(1, 1, 0);
 					matrix.translate(0, 0, 1);
+					// matrix.scale(1, -1, -1);
 
 					matrix.frustum(-2, 2, -1.5, 1.5, 2, 100);
 					matrix.translate(0, 0, 4);

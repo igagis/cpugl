@@ -25,15 +25,6 @@
 #	undef assert
 #endif
 
-namespace{
-void perspective(r4::matrix4<cpugl::real>& m, cpugl::real n){
-	m[0][2] += m[0][3] * n;
-	m[1][2] += m[1][3] * n;
-	m[2][2] += m[2][3] * n;
-	m[3][2] += m[3][3] * n;
-};
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape): fatal exceptions are not caught
 int main(int argc, char **argv){
 	r4::vector3<cpugl::real> position{0, 0, 0};
@@ -205,7 +196,7 @@ int main(int argc, char **argv){
 					// matrix.scale(1, -1);
 
 					matrix.scale(1, 4/3.0);
-					perspective(matrix, 1);
+					matrix.perspective();
 					
 					matrix.translate(0, 0, 4);
 

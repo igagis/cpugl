@@ -34,6 +34,11 @@ SOFTWARE.
 
 namespace cpugl {
 
+// Rasterization tutorial:
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
+
+// TODO: optimize, see suggestions in https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-practical-implementation.html
+
 class pipeline
 {
 	static r4::segment2<real> calc_bounding_box_segment(
@@ -204,9 +209,6 @@ class pipeline
 	}
 
 public:
-	// Rasterization tutorial:
-	// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
-
 	template <bool depth_test, typename vertex_program_type, typename fragment_program_type, typename... attribute_type>
 	static void render(
 		context& ctx,

@@ -69,9 +69,9 @@ class pipeline
 	)
 	{
 		std::array<r4::vector2<real>, 3> v = {
-			std::get<0>(face[0]) / std::get<0>(face[0]).w(), //
-			std::get<0>(face[1]) / std::get<0>(face[1]).w(),
-			std::get<0>(face[2]) / std::get<0>(face[2]).w()
+			std::get<0>(face[0]),
+			std::get<0>(face[1]),
+			std::get<0>(face[2]),
 		};
 
 		auto edge_0_1 = v[1] - v[0];
@@ -117,6 +117,12 @@ class pipeline
 
 		auto framebuffer_span = framebuffer.span().subspan(bounding_box);
 
+		r4::vector3<real> depth_reciprocal(
+			1 / std::get<0>(face[0]).w(),
+			1 / std::get<0>(face[1]).w(),
+			1 / std::get<0>(face[2]).w()
+		);
+
 		auto p = bounding_box.p.to<real>();
 		for (auto line : framebuffer_span) {
 			for (auto& framebuffer_pixel : line) {
@@ -135,10 +141,12 @@ class pipeline
 					// normalize barycentric coordinates
 					barycentric /= triangle_area;
 
+					real depth = 1 / (depth_reciprocal * barycentric);
+
 					auto interpolated_attributes = //
-						[&b = barycentric, &f = face]<size_t... i>(std::index_sequence<i...>) {
+						[&b = barycentric, &f = face, &depth]<size_t... i>(std::index_sequence<i...>) {
 							return std::make_tuple(
-								(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2])...
+								(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2]) * depth...
 							);
 						}(utki::offset_sequence_t<
 							1,
@@ -172,6 +180,27 @@ class pipeline
 			p.x() = bounding_box.p.x();
 			++p.y();
 		}
+	}
+
+	template <typename... attribute_type>
+	static std::tuple<r4::vector4<real>, attribute_type...> perspective_divide(
+		const std::tuple<r4::vector4<real>, attribute_type...>& vertex
+	)
+	{
+		return std::apply(
+			[](const r4::vector4<real>& pos, const attribute_type&... attribute) {
+				return std::make_tuple(
+					r4::vector4<real>(
+						pos.x() / pos.w(), //
+						pos.y() / pos.w(),
+						pos.z() / pos.w(),
+						pos.w()
+					),
+					attribute / pos.w()...
+				);
+			},
+			vertex
+		);
 	}
 
 public:
@@ -216,6 +245,10 @@ public:
 				std::apply(vertex_program, mesh.vertices[unprocessed_face[1]]),
 				std::apply(vertex_program, mesh.vertices[unprocessed_face[2]])
 			};
+
+			for(auto& f : face){
+				f = perspective_divide(f);
+			}
 
 			rasterize<depth_test>(ctx, fragment_program, face);
 		}

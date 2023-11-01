@@ -203,8 +203,6 @@ int main(int argc, char **argv){
 					matrix.translate(position);
 					matrix.rotate(rotation);
 
-					// matrix.scale(width / 2, height / 2);
-
 					cpugl::texture_pos_tex_shader::render(
 						glc,
 						matrix,

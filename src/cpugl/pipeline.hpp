@@ -56,14 +56,41 @@ class pipeline
 		};
 	}
 
-	static real edge_function(const r4::vector2<real>& edge, const r4::vector2<real>& vec)
+	struct edge_info
 	{
-		return vec.cross(edge);
+		r4::vector2<real> begin;
+		r4::vector2<real> vector;
+		real sign;
+	};
+
+	static edge_info make_edge(r4::vector2<real> begin, r4::vector2<real> end){
+		// In order to make float computations equivalent for two edges with swapped ends
+		// we need to sort edge ends.
+
+		// sort edge's begin and end points by X and then by Y
+		if(begin.x() < end.x() || (begin.x() == end.x() && begin.y() < end.y())){
+			return {
+				.begin = begin,
+				.vector = end - begin,
+				.sign = 1
+			};
+		}else{
+			return {
+				.begin = end,
+				.vector = begin - end,
+				.sign = -1
+			};
+		}
+	};
+
+	static real edge_function(const edge_info& edge, const r4::vector2<real>& point)
+	{
+		return (point - edge.begin).cross(edge.vector) * edge.sign;
 	}
 
-	static bool is_top_left(const r4::vector2<real>& edge)
+	static bool is_top_left(const edge_info& edge)
 	{
-		return edge.y() > 0 || (edge.y() == 0 && edge.x() < 0);
+		return (edge.vector.y() > 0 || (edge.vector.y() == 0 && edge.vector.x() < 0)) != (edge.sign < 0);
 	}
 
 	template <bool depth_test, typename fragment_program_type, typename vertex_program_res_type>
@@ -79,16 +106,17 @@ class pipeline
 			std::get<0>(face[2]),
 		};
 
-		auto edge_0_1 = v[1] - v[0];
-		auto edge_1_2 = v[2] - v[1];
-		auto edge_2_0 = v[0] - v[2];
+		auto edge_0_1 = make_edge(v[0], v[1]);
+		auto edge_2_0 = make_edge(v[2], v[0]);
 
-		auto triangle_area = edge_function(edge_2_0, edge_0_1);
+		auto triangle_area_doubled = edge_0_1.vector.cross(edge_2_0.vector) * edge_0_1.sign * edge_2_0.sign;
 
-		if (triangle_area <= 0) {
+		if (triangle_area_doubled <= 0) {
 			// triangle is facing away
 			return;
 		}
+
+		auto edge_1_2 = make_edge(v[1], v[2]);
 
 		auto& framebuffer = ctx.get_framebuffer();
 
@@ -132,9 +160,9 @@ class pipeline
 		for (auto line : framebuffer_span) {
 			for (auto& framebuffer_pixel : line) {
 				auto barycentric = r4::vector3<real>{
-					edge_function(edge_1_2, p - v[1]),
-					edge_function(edge_2_0, p - v[2]),
-					edge_function(edge_0_1, p - v[0])
+					edge_function(edge_1_2, p),
+					edge_function(edge_2_0, p),
+					edge_function(edge_0_1, p)
 				};
 
 				bool overlaps = //
@@ -144,7 +172,7 @@ class pipeline
 
 				if (overlaps) {
 					// normalize barycentric coordinates
-					barycentric /= triangle_area;
+					barycentric /= triangle_area_doubled;
 
 					real depth = 1 / (depth_reciprocal * barycentric);
 

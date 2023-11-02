@@ -34,7 +34,7 @@ void pos_clr_shader::render(context& ctx, const r4::matrix4<real>& matrix, const
 {
 	pipeline::render<false>( // false = no depth test
 		ctx,
-		[&matrix](const r4::vector4<real>& pos, const r4::vector4<float>& clr) {
+		[&matrix](const r4::vector4<real>& pos, const r4::vector4<real>& clr) {
 			return std::make_tuple(matrix * pos, clr);
 		},
 		[](const auto& clr) {

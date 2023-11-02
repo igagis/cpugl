@@ -94,7 +94,7 @@ int main(int argc, char **argv){
 						{r, t, 0, 1}
 					};
 
-					const std::vector<r4::vector4<float>> colors = {
+					const std::vector<r4::vector4<cpugl::real>> colors = {
 						{1, 0, 0, 1},
 						{0, 1, 0, 1},
 						{0, 0, 1, 1},

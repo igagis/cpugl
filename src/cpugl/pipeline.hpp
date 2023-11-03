@@ -83,6 +83,7 @@ class pipeline
 		}
 	};
 
+	// test if point is on the left or right side of the edge
 	static real edge_function(const edge_info& edge, const r4::vector2<real>& point)
 	{
 		return (point - edge.begin).cross(edge.vector) * edge.sign;

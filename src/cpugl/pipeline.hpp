@@ -277,6 +277,21 @@ public:
 				std::apply(vertex_program, mesh.vertices[unprocessed_face[2]])
 			};
 
+			std::vector<unsigned> negative_indices;
+			negative_indices.reserve(3);
+
+			for(unsigned i = 0; i != face.size(); ++i){
+				if(std::get<0>(face[i]).z() < 0){
+					negative_indices.push_back(i);
+				}
+			}
+
+			ASSERT(negative_indices.size() <= 3)
+			if(negative_indices.size() == 3){
+				// face is completely behind near plane
+				continue;
+			}
+
 			for(auto& f : face){
 				f = perspective_divide(f);
 			}

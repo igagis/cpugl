@@ -37,7 +37,8 @@ namespace cpugl {
 // Rasterization tutorial:
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html
 
-// TODO: optimize, see suggestions in https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-practical-implementation.html
+// TODO: optimize, see suggestions in
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-practical-implementation.html
 
 class pipeline
 {
@@ -56,30 +57,22 @@ class pipeline
 		};
 	}
 
-	struct edge_info
-	{
+	struct edge_info {
 		r4::vector2<real> begin;
 		r4::vector2<real> vector;
 		real sign;
 	};
 
-	static edge_info make_edge(r4::vector2<real> begin, r4::vector2<real> end){
+	static edge_info make_edge(r4::vector2<real> begin, r4::vector2<real> end)
+	{
 		// In order to make float computations equivalent for two edges with swapped ends
 		// we need to sort edge ends.
 
 		// sort edge's begin and end points by X and then by Y
-		if(begin.x() < end.x() || (begin.x() == end.x() && begin.y() < end.y())){
-			return {
-				.begin = begin,
-				.vector = end - begin,
-				.sign = 1
-			};
-		}else{
-			return {
-				.begin = end,
-				.vector = begin - end,
-				.sign = -1
-			};
+		if (begin.x() < end.x() || (begin.x() == end.x() && begin.y() < end.y())) {
+			return {.begin = begin, .vector = end - begin, .sign = 1};
+		} else {
+			return {.begin = end, .vector = begin - end, .sign = -1};
 		}
 	};
 
@@ -94,17 +87,14 @@ class pipeline
 		return (edge.vector.y() > 0 || (edge.vector.y() == 0 && edge.vector.x() < 0)) != (edge.sign < 0);
 	}
 
-	template <typename... attribute_type>
-	using vertex_program_result_type = std::tuple<r4::vector4<real>, attribute_type...>;
-
-	template <typename... attribute_type>
-	using processed_face_type = std::array<vertex_program_result_type<attribute_type...>, 3>;
+	template <typename vertex_program_res_type>
+	using processed_face_type = std::array<vertex_program_res_type, 3>;
 
 	template <bool depth_test, typename fragment_program_type, typename vertex_program_res_type>
 	static void rasterize(
 		context& ctx,
 		const fragment_program_type& fragment_program,
-		const std::array<vertex_program_res_type, 3>& face
+		const processed_face_type<vertex_program_res_type>& face
 	)
 	{
 		std::array<r4::vector2<real>, 3> v = {
@@ -186,7 +176,8 @@ class pipeline
 					auto interpolated_attributes = //
 						[&b = barycentric, &f = face, &depth]<size_t... i>(std::index_sequence<i...>) {
 							return std::make_tuple(
-								(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2]) * depth...
+								(std::get<i>(f[0]) * b[0] + std::get<i>(f[1]) * b[1] + std::get<i>(f[2]) * b[2]) *
+								depth...
 							);
 						}(utki::offset_sequence_t<
 							1,
@@ -222,13 +213,11 @@ class pipeline
 		}
 	}
 
-	template <typename... attribute_type>
-	static vertex_program_result_type<attribute_type...> perspective_divide(
-		const vertex_program_result_type<attribute_type...>& vertex
-	)
+	template <typename vertex_program_res_type>
+	static vertex_program_res_type perspective_divide(const vertex_program_res_type& vertex)
 	{
 		return std::apply(
-			[](const r4::vector4<real>& pos, const attribute_type&... attribute) {
+			[]<typename... attribute_type>(const r4::vector4<real>& pos, const attribute_type&... attribute) {
 				return std::make_tuple(
 					r4::vector4<real>(
 						pos.x() / pos.w(), //
@@ -243,12 +232,27 @@ class pipeline
 		);
 	}
 
-	template <typename... attribute_type>
-	static utki::span<processed_face_type<attribute_type...>> clip(
-		std::array<processed_face_type<attribute_type...>, 2>& vertex
+	template <typename vertex_program_res_type>
+	static utki::span<processed_face_type<vertex_program_res_type>> clip(
+		std::array<processed_face_type<vertex_program_res_type>, 2>& faces
 	)
 	{
-		return nullptr;
+		std::vector<unsigned> negative_indices;
+		negative_indices.reserve(3);
+
+		for (unsigned i = 0; i != faces.front().size(); ++i) {
+			if (std::get<0>(faces.front()[i]).z() < 0) {
+				negative_indices.push_back(i);
+			}
+		}
+
+		ASSERT(negative_indices.size() <= 3)
+		if (negative_indices.size() == 3) {
+			// face is completely behind near plane
+			return nullptr;
+		}
+
+		return utki::span(faces.data(), 1);
 	}
 
 public:
@@ -285,32 +289,26 @@ public:
 		);
 
 		for (const auto& unprocessed_face : mesh.faces) {
-			std::array<vertex_program_res_type, 3> face{
-				std::apply(vertex_program, mesh.vertices[unprocessed_face[0]]),
-				std::apply(vertex_program, mesh.vertices[unprocessed_face[1]]),
-				std::apply(vertex_program, mesh.vertices[unprocessed_face[2]])
-			};
+			// clang-format off
+			std::array<processed_face_type<vertex_program_res_type>, 2> faces{{
+				{
+					std::apply(vertex_program, mesh.vertices[unprocessed_face[0]]),
+					std::apply(vertex_program, mesh.vertices[unprocessed_face[1]]),
+					std::apply(vertex_program, mesh.vertices[unprocessed_face[2]])
+				},
+ 				{}
+			}};
+			// clang-format on
 
-			std::vector<unsigned> negative_indices;
-			negative_indices.reserve(3);
+			auto clipped_faces = clip(faces);
 
-			for(unsigned i = 0; i != face.size(); ++i){
-				if(std::get<0>(face[i]).z() < 0){
-					negative_indices.push_back(i);
+			for (auto& face : clipped_faces) {
+				for (auto& f : face) {
+					f = perspective_divide(f);
 				}
-			}
 
-			ASSERT(negative_indices.size() <= 3)
-			if(negative_indices.size() == 3){
-				// face is completely behind near plane
-				continue;
+				rasterize<depth_test>(ctx, fragment_program, face);
 			}
-
-			for(auto& f : face){
-				f = perspective_divide(f);
-			}
-
-			rasterize<depth_test>(ctx, fragment_program, face);
 		}
 	}
 };

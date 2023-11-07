@@ -94,6 +94,12 @@ class pipeline
 		return (edge.vector.y() > 0 || (edge.vector.y() == 0 && edge.vector.x() < 0)) != (edge.sign < 0);
 	}
 
+	template <typename... attribute_type>
+	using vertex_program_result_type = std::tuple<r4::vector4<real>, attribute_type...>;
+
+	template <typename... attribute_type>
+	using processed_face_type = std::array<vertex_program_result_type<attribute_type...>, 3>;
+
 	template <bool depth_test, typename fragment_program_type, typename vertex_program_res_type>
 	static void rasterize(
 		context& ctx,
@@ -217,8 +223,8 @@ class pipeline
 	}
 
 	template <typename... attribute_type>
-	static std::tuple<r4::vector4<real>, attribute_type...> perspective_divide(
-		const std::tuple<r4::vector4<real>, attribute_type...>& vertex
+	static vertex_program_result_type<attribute_type...> perspective_divide(
+		const vertex_program_result_type<attribute_type...>& vertex
 	)
 	{
 		return std::apply(
@@ -235,6 +241,14 @@ class pipeline
 			},
 			vertex
 		);
+	}
+
+	template <typename... attribute_type>
+	static utki::span<processed_face_type<attribute_type...>> clip(
+		std::array<processed_face_type<attribute_type...>, 2>& vertex
+	)
+	{
+		return nullptr;
 	}
 
 public:

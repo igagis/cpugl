@@ -247,10 +247,20 @@ class pipeline
 		}
 
 		ASSERT(negative_indices.size() <= 3)
+		
+		if(negative_indices.empty()){
+			// the face is completely ahead of the near plane
+			return utki::span(faces.data(), 1);
+		}
+
 		if (negative_indices.size() == 3) {
 			// face is completely behind near plane
 			return nullptr;
 		}
+
+		// TODO: optimization: drop faces which are completely out of screen
+
+		// TODO: clip
 
 		return utki::span(faces.data(), 1);
 	}

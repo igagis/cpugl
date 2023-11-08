@@ -232,6 +232,39 @@ class pipeline
 		);
 	}
 
+	// clip edge by z = 0.
+	// return new vertex with z = 0.
+	template <typename vertex_program_res_type>
+	static vertex_program_res_type clip_edge(
+		const vertex_program_res_type& positive_z_vertex,
+		const vertex_program_res_type& negative_z_vertex
+	)
+	{
+		const auto& pv_pos = std::get<0>(positive_z_vertex);
+		auto& nv_pos = std::get<0>(negative_z_vertex);
+
+		ASSERT(nv_pos.z() < 0)
+		ASSERT(pv_pos.z() >= 0)
+		auto edge = pv_pos - nv_pos;
+		ASSERT(edge.z() > 0)
+		auto factor = -nv_pos.z() / edge.z();
+		ASSERT(factor >= 0)
+		ASSERT(factor < 1)
+
+		return
+			[&pv = positive_z_vertex, &nv = negative_z_vertex, factor, &edge]<size_t... i>(std::index_sequence<i...>) {
+				return std::make_tuple(
+					std::get<0>(nv) + edge * factor,
+					std::get<i>(nv) * (real(1) - factor) + std::get<i>(pv) * factor...
+				);
+			}(utki::offset_sequence_t<
+				1,
+				std::make_index_sequence< //
+					std::tuple_size_v<vertex_program_res_type> - 1 //
+					> //
+				>{});
+	}
+
 	// clip face by (z < 0) half-space
 	template <typename vertex_program_res_type>
 	static utki::span<processed_face_type<vertex_program_res_type>> clip(
@@ -248,15 +281,15 @@ class pipeline
 		for (unsigned i = 0; i != faces.front().size(); ++i) {
 			if (std::get<0>(faces.front()[i]).z() < 0) {
 				negative_indices.push_back(i);
-			}else{
+			} else {
 				positive_indices.push_back(i);
 			}
 		}
 
 		ASSERT(negative_indices.size() <= 3)
 		ASSERT(positive_indices.size() <= 3)
-		
-		if(negative_indices.empty()){
+
+		if (negative_indices.empty()) {
 			ASSERT(positive_indices.size() == 3)
 			// the face is completely ahead of the near plane
 			return utki::span(faces.data(), 1);
@@ -270,42 +303,21 @@ class pipeline
 
 		// TODO: optimization: drop faces which are completely out of screen
 
-		switch(negative_indices.size()){
+		switch (negative_indices.size()) {
 			default:
 				ASSERT(false)
 				break;
-			case 1:
+			case 1: // 1 point below z = 0 and 2 points above
 				// TODO:
 				break;
-			case 2:
+			case 2: // 2 points below z = 0 and 1 point above
 				ASSERT(positive_indices.size() == 1)
 				{
 					const auto& positive_vertex = faces.front()[positive_indices.front()];
-					for(auto i : negative_indices){
+					for (auto i : negative_indices) {
 						auto& negative_vertex = faces.front()[i];
 
-						const auto& pv_pos = std::get<0>(positive_vertex);
-						auto& nv_pos = std::get<0>(negative_vertex);
-
-						ASSERT(nv_pos.z() < 0)
-						ASSERT(pv_pos.z() >= 0)
-						auto edge = pv_pos - nv_pos;
-						ASSERT(edge.z() > 0)
-						auto factor = -nv_pos.z() / edge.z();
-						ASSERT(factor >= 0)
-						ASSERT(factor < 1)
-						
-						negative_vertex = [&pv = positive_vertex, &nv = negative_vertex, factor, &edge]<size_t... i>(std::index_sequence<i...>) {
-							return std::make_tuple(
-								std::get<0>(nv) + edge * factor,
-								std::get<i>(nv) * (real(1) - factor) + std::get<i>(pv) * factor...
-							);
-						}(utki::offset_sequence_t<
-							1,
-							std::make_index_sequence< //
-								std::tuple_size_v<vertex_program_res_type> - 1 //
-								> //
-							>{});
+						negative_vertex = clip_edge(positive_vertex, negative_vertex);
 					}
 				}
 				return utki::span(faces.data(), 1);

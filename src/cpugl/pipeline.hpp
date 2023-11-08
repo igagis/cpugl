@@ -352,7 +352,7 @@ public:
 	{
 		static_assert(
 			[]<typename... arg_type>(std::tuple<arg_type...>) constexpr {
-				return std::is_invocable_v<decltype(vertex_program), const r4::vector4<real>&, const arg_type&...>;
+				return std::is_invocable_v<decltype(vertex_program), const r4::vector3<real>&, const arg_type&...>;
 			}(std::tuple<attribute_type...>{}),
 			"vertex_program must be invocable"
 		);

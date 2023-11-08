@@ -44,7 +44,7 @@ template <typename... attribute_type>
 class mesh
 {
 public:
-	std::vector<std::tuple<r4::vector4<real>, attribute_type...>> vertices;
+	std::vector<std::tuple<r4::vector3<real>, attribute_type...>> vertices;
 
 	std::vector<std::array<unsigned, 3>> faces;
 };
@@ -52,7 +52,7 @@ public:
 template <typename... attribute_type>
 mesh<attribute_type...> make_mesh(
 	std::vector<std::array<unsigned, 3>> faces,
-	utki::span<const r4::vector4<real>> pos,
+	utki::span<const r4::vector3<real>> pos,
 	utki::span<const attribute_type>... attribute
 )
 {

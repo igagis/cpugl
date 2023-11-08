@@ -45,7 +45,7 @@ void texture_pos_tex_shader::render( //
 
 				pipeline::render<false>(
 					ctx,
-					[&matrix](const r4::vector4<real>& pos, const r4::vector2<real> tex_coord) {
+					[&matrix](const r4::vector3<real>& pos, const r4::vector2<real> tex_coord) {
 						return std::make_tuple(matrix * pos, tex_coord);
 					},
 					[&tex](const r4::vector2<real>& tex_coord) {

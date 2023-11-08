@@ -39,7 +39,7 @@ void color_pos_shader::render(
 {
 	pipeline::render<false>( // false = no depth test
 		ctx,
-		[&matrix](const r4::vector4<real>& pos) {
+		[&matrix](const r4::vector3<real>& pos) {
 			return std::make_tuple(matrix * pos);
 		},
 		[&color]() {

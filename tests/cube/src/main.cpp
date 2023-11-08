@@ -38,36 +38,36 @@ int main(int argc, char **argv){
 
 	auto tex = rasterimage::read_jpeg(papki::fs_file("texture.jpg"));
 
-	const std::vector<r4::vector4<cpugl::real>> vertices = {
+	const std::vector<r4::vector3<cpugl::real>> vertices = {
 		// front
-		{l, t, -d, 1},
-		{l, b, -d, 1},
-		{r, b, -d, 1},
-		{r, t, -d, 1},
+		{l, t, -d},
+		{l, b, -d},
+		{r, b, -d},
+		{r, t, -d},
 
 		// back
-		{l, t, d, 1},
-		{l, b, d, 1},
-		{r, b, d, 1},
-		{r, t, d, 1},
+		{l, t, d},
+		{l, b, d},
+		{r, b, d},
+		{r, t, d},
 
 		// left
-		{l, t, -d, 1},
-		{l, b, -d, 1},
-		{l, b, d, 1},
-		{l, t, d, 1},
+		{l, t, -d},
+		{l, b, -d},
+		{l, b, d},
+		{l, t, d},
 
 		// right
-		{r, t, -d, 1},
-		{r, b, -d, 1},
-		{r, b, d, 1},
-		{r, t, d, 1},
+		{r, t, -d},
+		{r, b, -d},
+		{r, b, d},
+		{r, t, d},
 
 		// top
-		{l, t, -d, 1},
-		{l, t, d, 1},
-		{r, t, d, 1},
-		{r, t, -d, 1},
+		{l, t, -d},
+		{l, t, d},
+		{r, t, d},
+		{r, t, -d},
 	};
 
 	std::vector<std::array<unsigned, 3>> faces = {

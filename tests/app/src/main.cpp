@@ -87,11 +87,11 @@ int main(int argc, char **argv){
 					constexpr auto r = 799;
 					constexpr auto b = 599;
 
-					const std::vector<r4::vector4<cpugl::real>> vertices = {
-						{l, t, 0, 1},
-						{l, b, 0, 1},
-						{r, b, 0, 1},
-						{r, t, 0, 1}
+					const std::vector<r4::vector3<cpugl::real>> vertices = {
+						{l, t, 0},
+						{l, b, 0},
+						{r, b, 0},
+						{r, t, 0}
 					};
 
 					const std::vector<r4::vector4<cpugl::real>> colors = {

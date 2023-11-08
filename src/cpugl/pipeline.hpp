@@ -307,10 +307,23 @@ class pipeline
 			default:
 				ASSERT(false)
 				break;
-			case 1: // 1 point below z = 0 and 2 points above
-				// TODO:
-				break;
-			case 2: // 2 points below z = 0 and 1 point above
+			case 1:
+				ASSERT(negative_indices.size() == 1)
+				ASSERT(positive_indices.size() == 2)
+				// 1 triangle turns into 2 triangles
+				{
+					auto& negative_vertex = faces.front()[negative_indices[0]];
+
+					faces[1][negative_indices[0]] = faces[0][positive_indices[1]];
+					faces[1][positive_indices[1]] = clip_edge(faces[0][positive_indices[0]], negative_vertex);
+					faces[1][positive_indices[0]] = clip_edge(faces[0][positive_indices[1]], negative_vertex);
+
+					faces[0][negative_indices[0]] = faces[1][positive_indices[1]];
+				}
+				return utki::span(faces.data(), 2);
+			case 2:
+				// 1 triangle remains 1 triangle
+				ASSERT(negative_indices.size() == 2)
 				ASSERT(positive_indices.size() == 1)
 				{
 					const auto& positive_vertex = faces.front()[positive_indices.front()];

@@ -153,7 +153,9 @@ class pipeline
 			1 / std::get<0>(face[2]).w()
 		);
 
-		auto p = bounding_box.p.to<real>();
+		auto bb_pos = bounding_box.p.to<real>();
+
+		auto p = bb_pos;
 		for (auto line : framebuffer_span) {
 			for (auto& framebuffer_pixel : line) {
 				auto barycentric = r4::vector3<real>{
@@ -208,7 +210,7 @@ class pipeline
 
 				++p.x();
 			}
-			p.x() = bounding_box.p.x();
+			p.x() = bb_pos.x();
 			++p.y();
 		}
 	}

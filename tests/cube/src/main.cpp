@@ -154,75 +154,9 @@ int main(int argc, char **argv){
 		switch(ev.type){
 			default:
 				break;
-			case Expose:
-				std::cout << "Expose" << std::endl;
-				{
-					int dummy_int = 0;
-					unsigned dummy_unsigned = 0;
-					Window dummy_window = 0;
-					r4::vector2<unsigned> win_dims;
-					
-					XGetGeometry(
-						display,
-						window,
-						&dummy_window,
-						&dummy_int,
-						&dummy_int,
-						&win_dims.x(),
-						&win_dims.y(),
-						&dummy_unsigned,
-						&dummy_unsigned
-					);
-					
-					cpugl::context glc;
-
-					cpugl::context::fb_image_type fb(win_dims);
-
-					glc.set_framebuffer(fb);
-
-					constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
-					glc.clear(bg_color);
-
-					r4::matrix4<cpugl::real> matrix;
-					matrix.set_identity();
-
-					matrix.scale(width / 2, height / 2);
-					matrix.translate(1, 1, 0);
-
-					// matrix.scale(1, -1);
-					// matrix.rotate(r4::quaternion<cpugl::real>({utki::pi, 0, 0}));
-					// matrix.frustum(-2, 2, -1.5, 1.5, 2, 100);
-					// matrix.translate(0, 0, 1); // move projection plane to (0, 0, 0)
-					// matrix.scale(1, -1);
-
-					matrix.scale(1, 4/3.0);
-					matrix.perspective();
-					
-					matrix.translate(0, 0, 4);
-
-					matrix.translate(position);
-					matrix.rotate(rotation);
-
-					cpugl::texture_pos_tex_shader::render(
-						glc,
-						matrix,
-						tex,
-						vao
-					);
-
-					fb.span().swap_red_blue();
-
-					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-					auto ximage = XCreateImage(display, visual, utki::byte_bits * 3, ZPixmap, 0, reinterpret_cast<char*>(fb.pixels().data()), fb.dims().x(), fb.dims().y(), utki::byte_bits, 0);
-					utki::scope_exit scope_exit([ximage](){
-						ximage->data = nullptr; // Xlib will try to deallocate data which is owned by 'img' variable.
-						XDestroyImage(ximage);
-					});
-					
-					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast, cppcoreguidelines-pro-bounds-pointer-arithmetic)
-					XPutImage(display, window, DefaultGC(display, 0), ximage, 0, 0, 0, 0, fb.dims().x(), fb.dims().y());
-				}
-				break;
+			// case Expose:
+			// 	// std::cout << "Expose" << std::endl;
+			// 	break;
 			case KeyPress:
 				{
 					constexpr auto esc_key = 9;
@@ -292,11 +226,79 @@ int main(int argc, char **argv){
 							break;
 					}
 				}
-				XClearArea(display, window, 0, 0, width, height, True);
+				// XClearArea(display, window, 0, 0, width, height, True);
 				break;
 			case ButtonPress:
 				exit(0);
 				break;
+		}
+
+		// render
+		{
+			int dummy_int = 0;
+			unsigned dummy_unsigned = 0;
+			Window dummy_window = 0;
+			r4::vector2<unsigned> win_dims;
+			
+			XGetGeometry(
+				display,
+				window,
+				&dummy_window,
+				&dummy_int,
+				&dummy_int,
+				&win_dims.x(),
+				&win_dims.y(),
+				&dummy_unsigned,
+				&dummy_unsigned
+			);
+			
+			cpugl::context glc;
+
+			cpugl::context::fb_image_type fb(win_dims);
+
+			glc.set_framebuffer(fb);
+
+			constexpr auto bg_color = decltype(fb)::pixel_type{0, 0, 0, 0xff};
+			glc.clear(bg_color);
+
+			r4::matrix4<cpugl::real> matrix;
+			matrix.set_identity();
+
+			matrix.scale(cpugl::real(width) / 2, cpugl::real(height) / 2);
+			matrix.translate(1, 1, 0);
+
+			// matrix.scale(1, -1);
+			// matrix.rotate(r4::quaternion<cpugl::real>({utki::pi, 0, 0}));
+			// matrix.frustum(-2, 2, -1.5, 1.5, 2, 100);
+			// matrix.translate(0, 0, 1); // move projection plane to (0, 0, 0)
+			// matrix.scale(1, -1);
+
+			matrix.scale(1, 4/3.0);
+			matrix.perspective();
+			
+			matrix.translate(0, 0, 4);
+
+			matrix.translate(position);
+			matrix.rotate(rotation);
+
+			cpugl::texture_pos_tex_shader::render(
+				glc,
+				matrix,
+				tex,
+				vao
+			);
+
+			fb.span().swap_red_blue();
+
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			auto ximage = XCreateImage(display, visual, utki::byte_bits * 3, ZPixmap, 0, reinterpret_cast<char*>(fb.pixels().data()), fb.dims().x(), fb.dims().y(), utki::byte_bits, 0);
+			utki::scope_exit scope_exit([ximage](){
+				ximage->data = nullptr; // Xlib will try to deallocate data which is owned by 'img' variable.
+				XDestroyImage(ximage);
+			});
+			
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+			XPutImage(display, window, DefaultGC(display, 0), ximage, 0, 0, 0, 0, fb.dims().x(), fb.dims().y());
 		}
 	}
 }

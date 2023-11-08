@@ -239,7 +239,7 @@ int main(int argc, char **argv){
 
 					std::cout << "keycode = " << ev.xkey.keycode << std::endl;
 
-					constexpr auto translate_step = 0.5;
+					constexpr auto translate_step = 0.1;
 					constexpr auto rotation_step_rad = utki::pi / 30;
 
 					switch(ev.xkey.keycode){

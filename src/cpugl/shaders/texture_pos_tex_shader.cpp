@@ -40,7 +40,7 @@ void texture_pos_tex_shader::render( //
 {
 	std::visit(
 		[&ctx, &matrix, &mesh](const auto& image) {
-			if constexpr (std::is_same_v<uint8_t, typename std::remove_reference_t<decltype(image)>::value_type>) {
+			if constexpr (std::is_same_v<uint8_t, typename std::remove_reference_t<decltype(image)>::pixel_type::value_type>) {
 				auto tex = make_texture(image);
 
 				pipeline::render<false>(

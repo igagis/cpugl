@@ -52,8 +52,8 @@ class pipeline
 		using std::max;
 
 		return {
-			min(v0, min(v1, v2)), //
-			max(v0, max(v1, v2))
+			.p1 = min(v0, min(v1, v2)), //
+			.p2 = max(v0, max(v1, v2))
 		};
 	}
 
@@ -300,7 +300,7 @@ class pipeline
 		if (negative_indices.size() == 3) {
 			ASSERT(positive_indices.empty())
 			// face is completely behind near plane
-			return nullptr;
+			return {};
 		}
 
 		// TODO: optimization: drop faces which are completely out of screen
@@ -338,7 +338,7 @@ class pipeline
 				return utki::span(faces.data(), 1);
 		}
 
-		return nullptr;
+		return {};
 	}
 
 public:
